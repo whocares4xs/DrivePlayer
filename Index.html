@@ -32,24 +32,38 @@
   .screen { position:absolute; inset:0; display:none; flex-direction:column; background:var(--bg); }
   .screen.active { display:flex; }
 
-  /* ─── AUTH SCREEN ─── */
+  /* ─── AUTH / LOADING SCREEN ─── */
   #auth-screen {
-    align-items:center; justify-content:center; gap:32px;
+    align-items:center; justify-content:center; gap:28px;
     background: radial-gradient(ellipse at 50% 30%, #1a1500 0%, #000 70%);
   }
-  .auth-logo { display:flex; flex-direction:column; align-items:center; gap:8px; }
-  .auth-logo svg { width:56px; height:56px; }
+  .auth-logo { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .auth-logo svg { width:64px; height:64px; }
   .auth-title { font-family:'DM Serif Display',serif; font-size:32px; letter-spacing:-0.5px; color:var(--accent); }
-  .auth-sub { font-size:13px; color:var(--text2); letter-spacing:2px; text-transform:uppercase; }
+  .auth-sub { font-size:12px; color:var(--text2); letter-spacing:2px; text-transform:uppercase; }
+  /* Loading spinner shown during auto-sign-in attempt */
+  .auth-spinner {
+    width:36px; height:36px; border-radius:50%;
+    border:2px solid #1a1a1a; border-top-color:var(--accent);
+    animation:spin 0.9s linear infinite;
+  }
+  .auth-status {
+    font-size:13px; color:var(--text3); text-align:center;
+    min-height:18px; transition:color 0.3s;
+  }
+  /* Fallback manual sign-in button — hidden until needed */
   .auth-btn {
-    display:flex; align-items:center; gap:12px;
+    display:none; align-items:center; gap:12px;
     background:var(--accent); color:#000; border:none; border-radius:50px;
     padding:14px 28px; font-size:15px; font-weight:600; cursor:pointer;
     font-family:'DM Sans',sans-serif; letter-spacing:0.3px;
     box-shadow:0 0 40px rgba(232,201,122,0.3);
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition:transform 0.15s, box-shadow 0.15s;
   }
-  .auth-btn:active { transform:scale(0.96); box-shadow:0 0 20px rgba(232,201,122,0.2); }
+  .auth-btn.visible { display:flex; }
+  .auth-btn:active { transform:scale(0.96); }
+  /* GIS One Tap container positioning */
+  #g_id_onload { position:fixed; top:60px; right:12px; z-index:9999; }
 
   /* ─── SCAN SCREEN ─── */
   #scan-screen { align-items:center; justify-content:center; gap:24px; }
@@ -660,29 +674,47 @@
     /* already dark */
   }
 </style>
+<!-- Google Identity Services — handles auto sign-in + One Tap -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
-<!-- ─── AUTH ─── -->
+<!-- ─── AUTH / AUTO-LOADING SCREEN ─── -->
 <div id="auth-screen" class="screen active">
+  <!-- GIS One Tap anchor — GIS library injects its UI here -->
+  <div id="g_id_onload"
+    data-client_id="1054373546438-khbk4asdohgfdhon3q7j9cfj63ha02qt.apps.googleusercontent.com"
+    data-callback="gisOneTapCallback"
+    data-auto_select="true"
+    data-itp_support="true">
+  </div>
+
   <div class="auth-logo">
-    <svg viewBox="0 0 56 56" fill="none">
-      <circle cx="28" cy="28" r="27" stroke="#e8c97a" stroke-width="1.5"/>
-      <!-- headphones -->
-      <path d="M16 28 C16 20.268 21.373 14 28 14 C34.627 14 40 20.268 40 28" stroke="#e8c97a" stroke-width="2" stroke-linecap="round" fill="none"/>
-      <rect x="13" y="27" width="6" height="10" rx="3" fill="#e8c97a"/>
-      <rect x="37" y="27" width="6" height="10" rx="3" fill="#e8c97a"/>
+    <svg viewBox="0 0 64 64" fill="none">
+      <circle cx="32" cy="32" r="31" stroke="#e8c97a" stroke-width="1.5"/>
+      <path d="M18 32 C18 23.2 24.3 16 32 16 C39.7 16 46 23.2 46 32"
+        stroke="#e8c97a" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <rect x="14" y="31" width="7" height="12" rx="3.5" fill="#e8c97a"/>
+      <rect x="43" y="31" width="7" height="12" rx="3.5" fill="#e8c97a"/>
     </svg>
     <div class="auth-title">DrivePlayer</div>
     <div class="auth-sub">Stream from Google Drive</div>
   </div>
+
+  <!-- Spinner shown while auto-sign-in is in progress -->
+  <div class="auth-spinner" id="auth-spinner"></div>
+  <div class="auth-status" id="auth-status">Signing in…</div>
+
+  <!-- Fallback button — only shown if auto-sign-in fails or user declines One Tap -->
   <button class="auth-btn" id="sign-in-btn">
-    <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    <svg width="20" height="20" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+      <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
     Sign in with Google
   </button>
-  <div style="font-size:11px;color:#333;padding:0 40px;text-align:center;line-height:1.8;">
-    Requires Google Drive access to stream your MUSIC folder
-  </div>
 </div>
 
 <!-- ─── SCAN ─── -->
@@ -1233,42 +1265,98 @@ function dbSet(store, key, val) {
 // ════════════════════════════════════════════════════════════════
 //  GOOGLE OAUTH
 // ════════════════════════════════════════════════════════════════
-function signIn() {
-  const params = new URLSearchParams({
-    client_id: CONFIG.CLIENT_ID,
-    redirect_uri: location.origin + location.pathname,
-    response_type: 'token',
-    scope: CONFIG.SCOPES,
-    include_granted_scopes: 'true',
+// ════════════════════════════════════════════════════════════════
+//  GOOGLE IDENTITY SERVICES — AUTO SIGN-IN
+//  Replaces the old implicit OAuth redirect flow.
+//  GIS handles token retrieval silently after the first consent.
+// ════════════════════════════════════════════════════════════════
+
+// GIS token client — initialized when GIS library loads
+let _gisTokenClient = null;
+// Resolve function for the pending token request
+let _gisResolve     = null;
+
+// Called by GIS One Tap after user consent (first launch or re-auth)
+function gisOneTapCallback(response) {
+  // One Tap returns an id_token (JWT), not an access token.
+  // We still need an access token for Drive API, so we trigger
+  // the token client to get one silently immediately after.
+  requestAccessToken();
+}
+
+// GIS calls this automatically when its library finishes loading
+window.onGoogleLibraryLoad = function() { gisInit(); };
+
+// Initialize GIS token client — called once GIS library is ready
+function gisInit() {
+  _gisTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id:  CONFIG.CLIENT_ID,
+    scope:      CONFIG.SCOPES,
+    // Called when we get a token (silent or after user consent)
+    callback:   (tokenResponse) => {
+      if (tokenResponse.error) {
+        // Failed — show manual button
+        showAuthFallback('Auto sign-in failed. Please sign in manually.');
+        return;
+      }
+      // Save token to localStorage (persists across sessions)
+      const expiresIn = parseInt(tokenResponse.expires_in || '3600');
+      State.token      = tokenResponse.access_token;
+      State.tokenExpiry = Date.now() + expiresIn * 1000 - 60000;
+      localStorage.setItem('dp_token',  State.token);
+      localStorage.setItem('dp_expiry', State.tokenExpiry);
+      // Resolve the pending promise so init() can proceed
+      if (_gisResolve) { _gisResolve(true); _gisResolve = null; }
+    },
+    // Don't show the consent screen if we already have a valid session
+    prompt: '',
   });
-  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
-}
 
-function parseTokenFromHash() {
-  const hash = new URLSearchParams(location.hash.slice(1));
-  const token = hash.get('access_token');
-  const expiresIn = parseInt(hash.get('expires_in') || '0');
-  if (token) {
-    State.token = token;
-    State.tokenExpiry = Date.now() + expiresIn * 1000 - 60000;
-    sessionStorage.setItem('dp_token', token);
-    sessionStorage.setItem('dp_expiry', State.tokenExpiry);
-    history.replaceState(null, '', location.pathname);
-    return true;
+  // Kick off init now that GIS is ready
+  if (typeof _gisReadyResolve === 'function') {
+    _gisReadyResolve();
+    _gisReadyResolve = null;
   }
-  return false;
 }
 
+// Request an access token — silently if possible, with prompt if not
+function requestAccessToken(forcePrompt = false) {
+  if (!_gisTokenClient) return;
+  _gisTokenClient.requestAccessToken({
+    prompt: forcePrompt ? 'consent' : '',
+  });
+}
+
+// Load token from localStorage (survives browser restarts)
 function loadStoredToken() {
-  const token = sessionStorage.getItem('dp_token');
-  const expiry = parseInt(sessionStorage.getItem('dp_expiry') || '0');
+  const token  = localStorage.getItem('dp_token');
+  const expiry = parseInt(localStorage.getItem('dp_expiry') || '0');
   if (token && expiry > Date.now()) {
-    State.token = token;
+    State.token      = token;
     State.tokenExpiry = expiry;
     return true;
   }
   return false;
 }
+
+// Show the fallback manual sign-in button
+function showAuthFallback(msg) {
+  document.getElementById('auth-spinner').style.display   = 'none';
+  document.getElementById('auth-status').textContent      = msg || 'Tap to sign in';
+  document.getElementById('sign-in-btn').classList.add('visible');
+}
+
+// Promise that resolves when the GIS library has loaded and gisInit() ran
+let _gisReadyResolve = null;
+const gisReady = new Promise(resolve => { _gisReadyResolve = resolve; });
+
+// Manual sign-in button — requests token with full consent UI
+document.getElementById('sign-in-btn').addEventListener('click', () => {
+  document.getElementById('sign-in-btn').classList.remove('visible');
+  document.getElementById('auth-spinner').style.display   = '';
+  document.getElementById('auth-status').textContent      = 'Signing in…';
+  requestAccessToken(true);
+});
 
 // ════════════════════════════════════════════════════════════════
 //  DRIVE API HELPERS
@@ -3148,9 +3236,7 @@ Audio.addEventListener('pause', vizSyncPlayPause);
 //  EVENT WIRING
 // ════════════════════════════════════════════════════════════════
 // Auth
-document.getElementById('sign-in-btn').addEventListener('click', () => {
-  signIn();
-});
+// Sign-in button wired in GIS auth section above
 
 // Lib tabs
 document.querySelectorAll('.lib-tab').forEach(t => {
@@ -3241,16 +3327,29 @@ function hideLogoutModal() {
 
 function doLogout() {
   hideLogoutModal();
+
+  // Revoke GIS token so auto sign-in re-prompts on next launch
+  if (State.token && typeof google !== 'undefined' && google.accounts) {
+    try { google.accounts.oauth2.revoke(State.token, () => {}); } catch(e) {}
+  }
+
+  // Clear stored credentials from localStorage
   State.token = null;
-  sessionStorage.removeItem('dp_token');
-  sessionStorage.removeItem('dp_expiry');
+  localStorage.removeItem('dp_token');
+  localStorage.removeItem('dp_expiry');
+
+  // Stop playback
   Audio.pause();
   Audio.src = '';
   State.currentSong = null;
   hideMiniPlayer();
   if (typeof closeVisualizer === 'function') closeVisualizer();
-  // Push a fresh history entry so future back presses don't loop
-  history.replaceState({ page: 'auth' }, '');
+
+  // Reset auth screen to show sign-in button for next attempt
+  document.getElementById('auth-spinner').style.display = 'none';
+  document.getElementById('auth-status').textContent    = 'You have been signed out.';
+  document.getElementById('sign-in-btn').classList.add('visible');
+
   showScreen('auth-screen');
 }
 
@@ -3272,6 +3371,34 @@ document.getElementById('logout-modal').addEventListener('click', e => {
     hideLogoutModal();
   }
 });
+
+// ── Long-press "Library" title (700ms) → logout confirmation ─
+// This is the only trigger — no visible button, no back-button hack.
+(function wireLongPressLogout() {
+  const titleEl = document.getElementById('lib-title-text');
+  if (!titleEl) return;
+  let _timer = null;
+  let _moved = false;
+  function startPress() {
+    _moved = false;
+    _timer = setTimeout(() => {
+      if (!_moved && document.getElementById('library-screen').classList.contains('active')) {
+        showLogoutModal();
+      }
+    }, 700);
+  }
+  function cancelPress() { clearTimeout(_timer); }
+  function movePress()   { _moved = true; clearTimeout(_timer); }
+  titleEl.addEventListener('touchstart',  startPress, { passive: true });
+  titleEl.addEventListener('touchend',    cancelPress);
+  titleEl.addEventListener('touchcancel', cancelPress);
+  titleEl.addEventListener('touchmove',   movePress,  { passive: true });
+  titleEl.addEventListener('mousedown',   startPress);
+  titleEl.addEventListener('mouseup',     cancelPress);
+  titleEl.addEventListener('mouseleave',  cancelPress);
+  titleEl.addEventListener('mousemove',   movePress);
+  titleEl.addEventListener('contextmenu', e => e.preventDefault());
+})();
 
 // ── Intercept hardware/gesture back button (Android Chrome) ─
 // Strategy: always keep a sentinel history entry on top.
@@ -4337,27 +4464,73 @@ document.getElementById('crp-close-btn').addEventListener('click', dismissCleanU
 async function init() {
   State.db = await openDB();
 
-  // Load favorites
+  // Load favorites + shuffle history
   const favs = await dbGet('meta', 'favorites');
   if (favs) State.favorites = new Set(favs);
   updateFavBadge();
 
-  // Load persisted shuffle played-IDs so restarts don't repeat heard songs
   const savedPlayed = await dbGet('meta', 'playedIds');
   if (savedPlayed && Array.isArray(savedPlayed)) State.playedIds = new Set(savedPlayed);
 
-  // Check for OAuth token
-  let hasToken = parseTokenFromHash() || loadStoredToken();
-
-  if (!hasToken) {
-    showScreen('auth-screen');
+  // ── Step 1: Check localStorage for a still-valid token ──
+  if (loadStoredToken()) {
+    // We have a valid cached token — skip the auth screen entirely
+    await enterApp();
     return;
   }
 
-  // Check for cached library
+  // ── Step 2: No valid cached token — show loading screen and
+  //    wait for GIS to initialise, then request a token silently ──
+  showScreen('auth-screen');
+  document.getElementById('auth-status').textContent = 'Signing in…';
+
+  // Wait up to 6 seconds for GIS library to load
+  const gisTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 6000));
+  const result = await Promise.race([gisReady, gisTimeout]);
+
+  if (result === 'timeout' || !_gisTokenClient) {
+    // GIS didn't load (no internet?) — show manual button
+    showAuthFallback('Could not connect. Tap to sign in.');
+    return;
+  }
+
+  // ── Step 3: Request token silently (no UI if user already consented) ──
+  // We wrap requestAccessToken in a promise resolved by GIS callback
+  const gotToken = await new Promise(resolve => {
+    _gisResolve = resolve;
+    // Timeout fallback: if GIS doesn't call back in 5s, show button
+    const t = setTimeout(() => {
+      if (_gisResolve) {
+        _gisResolve = null;
+        resolve(false);
+      }
+    }, 5000);
+    // Override callback to also clear timeout
+    const origCallback = _gisTokenClient.callback;
+    _gisTokenClient.callback = (resp) => {
+      clearTimeout(t);
+      origCallback(resp);
+    };
+    requestAccessToken(false); // silent — no prompt
+  });
+
+  if (!gotToken || !State.token) {
+    // Silent attempt failed — One Tap or manual button will handle it
+    showAuthFallback('Tap below to sign in with Google');
+    return;
+  }
+
+  await enterApp();
+}
+
+// Called once we have a valid token — loads library and shows UI
+async function enterApp() {
+  showScreen('scan-screen');
+  document.getElementById('scan-label').textContent = 'Loading your library…';
+
   const cachedLib = await dbGet('library', 'data');
-  const isFirst = await dbGet('meta', 'firstLaunch');
-  State.firstLaunch = isFirst !== false; // first time if key not set
+  const isFirst   = await dbGet('meta', 'firstLaunch');
+  State.firstLaunch = isFirst !== false;
 
   if (cachedLib && !State.firstLaunch) {
     State.library = cachedLib;
@@ -4365,14 +4538,11 @@ async function init() {
   } else {
     await scanLibrary();
   }
-  // Push sentinel so hardware back is caught by our popstate handler
-  pushBackSentinel();
 }
 
 init().catch(e => {
   console.error(e);
-  document.getElementById('auth-screen').querySelector('.auth-sub').textContent = 'Error: ' + e.message;
-  showScreen('auth-screen');
+  showAuthFallback('Error: ' + e.message);
 });
 </script>
 </body>
