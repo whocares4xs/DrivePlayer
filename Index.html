@@ -431,6 +431,23 @@
   }
   .lib-shuffle-all-btn:active { transform: scale(0.95); }
 
+  /* ─── MULTI-DELETE SELECT MODE ─── */
+  .lib-item.delete-selected { background:rgba(224,85,85,0.12); }
+  .delete-select-bar {
+    position:fixed; bottom:0; left:0; right:0; z-index:95;
+    background:rgba(224,85,85,0.95); backdrop-filter:blur(12px);
+    display:none; align-items:center; gap:12px;
+    padding:14px 20px calc(14px + var(--safe-bottom,0px));
+  }
+  .delete-select-bar.active { display:flex; }
+  .dsb-count { flex:1; font-size:14px; font-weight:600; color:#fff; }
+  .dsb-btn {
+    padding:9px 18px; border-radius:50px; border:none; cursor:pointer;
+    font-size:13px; font-weight:700; font-family:'DM Sans',sans-serif;
+  }
+  .dsb-delete { background:#fff; color:#e05555; }
+  .dsb-cancel { background:rgba(255,255,255,0.2); color:#fff; }
+
   /* ─── SCROLLBARS ─── */
   .lib-list::-webkit-scrollbar, .browse-list::-webkit-scrollbar { width:2px; }
   .lib-list::-webkit-scrollbar-track, .browse-list::-webkit-scrollbar-track { background:transparent; }
@@ -915,6 +932,16 @@
       <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
       <div><div class="modal-item-label">Clean Names</div><div class="modal-item-sub">Remove artist/album from song &amp; album names</div></div>
     </div>
+    <div class="modal-item" id="menu-delete-song">
+      <div class="modal-item-icon" style="color:#e05555;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <div><div class="modal-item-label" style="color:#e05555;">Delete Song</div>
+      <div class="modal-item-sub">Remove from Drive permanently</div></div>
+    </div>
     <div class="modal-item" id="menu-cancel">
       <div class="modal-item-icon" style="color:#888"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
       <div class="modal-item-label" style="color:#888">Cancel</div>
@@ -995,6 +1022,35 @@
   </div>
 </div>
 
+<!-- ─── DELETE CONFIRM MODAL ─── -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:#e05555;">Delete?</div>
+    <div style="padding:0 20px 16px;font-size:14px;color:var(--text2);line-height:1.7;" id="delete-modal-msg">
+      This will remove this file permanently from Google Drive.
+    </div>
+    <div class="modal-item" id="delete-confirm-btn">
+      <div class="modal-item-icon" style="color:#e05555;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <div><div class="modal-item-label" style="color:#e05555;" id="delete-confirm-label">Yes, delete</div>
+      <div class="modal-item-sub" id="delete-confirm-sub">This cannot be undone</div></div>
+    </div>
+    <div class="modal-item" id="delete-cancel-btn">
+      <div class="modal-item-icon" style="color:var(--accent);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </div>
+      <div class="modal-item-label">No, keep it</div>
+    </div>
+  </div>
+</div>
+
 <!-- ─── ITEM CONTEXT MENU ─── -->
 <div class="modal-overlay" id="ctx-menu-modal">
   <div class="modal-sheet">
@@ -1023,6 +1079,16 @@
         <div class="modal-item-label">Fix Artwork</div>
         <div class="modal-item-sub">Search &amp; update album art</div>
       </div>
+    </div>
+    <div class="modal-item" id="ctx-delete-btn" style="display:none;">
+      <div class="modal-item-icon" style="color:#e05555;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <div><div class="modal-item-label" style="color:#e05555;">Delete Song</div>
+      <div class="modal-item-sub">Remove from Drive permanently</div></div>
     </div>
     <div class="modal-item" id="ctx-cancel-btn">
       <div class="modal-item-icon" style="color:#888">
@@ -1072,11 +1138,10 @@
     </div>
     <div class="art-fix-status" id="art-fix-status">
       <div class="spin"></div>
-      <span id="art-fix-status-text">Tap "Search" to find artwork</span>
+      <span id="art-fix-status-text">Searching…</span>
     </div>
     <div class="art-fix-results" id="art-fix-results"></div>
     <div class="art-fix-actions">
-      <button class="art-fix-btn secondary" id="art-fix-search-btn">Search</button>
       <button class="art-fix-btn primary" id="art-fix-save-btn" disabled>Apply</button>
       <button class="art-fix-btn secondary" id="art-fix-cancel-btn">Cancel</button>
     </div>
@@ -1174,6 +1239,13 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- ─── MULTI-DELETE SELECT BAR ─── -->
+<div class="delete-select-bar" id="delete-select-bar">
+  <div class="dsb-count" id="dsb-count">0 selected</div>
+  <button class="dsb-btn dsb-cancel" id="dsb-cancel-btn">Cancel</button>
+  <button class="dsb-btn dsb-delete" id="dsb-delete-btn">Delete</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1353,6 +1425,18 @@ async function driveRequest(url, opts = {}) {
 }
 
 // Rename a Drive file or folder (requires drive scope)
+// Delete a Drive file (moves to trash — recoverable from Drive web UI)
+async function driveDelete(fileId) {
+  const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/trash`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${State.token}` },
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Delete error: ${resp.status}`);
+  }
+}
+
 async function driveRename(fileId, newName) {
   const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
     method: 'PATCH',
@@ -1393,6 +1477,27 @@ async function findFolder(name, parentId = null) {
 
 function isAudioFile(name) {
   return /\.(mp3|flac|ogg|opus|m4a|aac|wav|wma|ape|alac)$/i.test(name);
+}
+
+function isImageFile(name) {
+  return /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(name);
+}
+
+// Fetch a Drive image file and return it as a base64 data URL
+async function fetchDriveImageAsBase64(fileId) {
+  try {
+    const resp = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      { headers: { Authorization: `Bearer ${State.token}` } }
+    );
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    return new Promise(res => {
+      const reader = new FileReader();
+      reader.onloadend = () => res(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
 }
 
 function getStreamUrl(fileId) {
@@ -1547,33 +1652,46 @@ async function fetchMissingArtwork(library, detailEl, countEl) {
     if (processed.has(artist.id)) continue;
     processed.add(artist.id);
 
-    // Check if we already have artist art
-    const existingArt = await dbGet('artwork', `artist_${artist.id}`);
-    if (existingArt) continue;
-
-    if (detailEl) detailEl.textContent = `Fetching art: ${artist.name}`;
+    if (detailEl) detailEl.textContent = `Scanning artwork: ${artist.name}`;
 
     for (const album of artist.albums) {
       const albumKey = `album_${album.id}`;
       const existingAlbumArt = await dbGet('artwork', albumKey);
-      if (existingAlbumArt) continue;
+      if (existingAlbumArt) continue; // already cached
 
+      let art = null;
+
+      // ── Step 1: Look for an image file inside the album folder ──
       try {
-        await sleep(300); // rate limit
-        const mbData = await fetchMusicBrainzRelease(artist.name, album.name);
-        if (mbData && mbData.id) {
-          const artUrl = `https://coverartarchive.org/release/${mbData.id}/front-250`;
-          const art = await fetchImageAsBase64(artUrl);
-          if (art) {
-            await dbSet('artwork', albumKey, art);
-            // Use first album art as artist art if missing
-            const artistArtExisting = await dbGet('artwork', `artist_${artist.id}`);
-            if (!artistArtExisting) {
-              await dbSet('artwork', `artist_${artist.id}`, art);
-            }
-          }
+        const albumContents = await listFiles(album.id);
+        const imgFile = albumContents.find(f => isImageFile(f.name));
+        if (imgFile) {
+          if (detailEl) detailEl.textContent = `Found folder art: ${album.name}`;
+          art = await fetchDriveImageAsBase64(imgFile.id);
         }
-      } catch (e) { /* skip */ }
+      } catch(e) { /* continue to online fallback */ }
+
+      // ── Step 2: If no folder image, search online ──
+      if (!art) {
+        try {
+          await sleep(300);
+          if (detailEl) detailEl.textContent = `Online search: ${album.name}`;
+          const mbData = await fetchMusicBrainzRelease(artist.name, album.name);
+          if (mbData && mbData.id) {
+            const artUrl = `https://coverartarchive.org/release/${mbData.id}/front-250`;
+            art = await fetchImageAsBase64(artUrl);
+          }
+        } catch(e) { /* skip */ }
+      }
+
+      if (art) {
+        await dbSet('artwork', albumKey, art);
+        // Use first album art as artist art if still missing
+        const artistArtExisting = await dbGet('artwork', `artist_${artist.id}`);
+        if (!artistArtExisting) {
+          await dbSet('artwork', `artist_${artist.id}`, art);
+        }
+      }
     }
   }
 }
@@ -1645,6 +1763,9 @@ async function openArtworkFixModal(type, item) {
   if (existingArt) thumbEl.innerHTML = `<img src="${existingArt}" alt="art"/>`;
 
   document.getElementById('artwork-fix-modal').classList.add('active');
+
+  // Auto-trigger search immediately — no need to tap Search
+  setTimeout(() => searchArtworkCandidates(), 150);
 }
 
 // ─── multi-source artwork search ─────────────────────────────
@@ -2335,9 +2456,23 @@ function renderLibraryTab(tab) {
     list.innerHTML = html;
     for (let i = 0; i < songs.length; i++) loadArtIntoEl(`art-song-${i}`, songs[i].artKey);
     list.querySelectorAll('.lib-item').forEach(el => {
+      const idx = parseInt(el.dataset.songIdx);
+      attachLongPress(el, () => {
+        if (DeleteState.selecting) {
+          el.classList.toggle('delete-selected', DeleteState.selected.has(songs[idx].id));
+          toggleDeleteSelect(songs[idx].id, el);
+        } else {
+          // Enter multi-select mode, select this song
+          enterDeleteSelect();
+          toggleDeleteSelect(songs[idx].id, el);
+        }
+      });
       el.addEventListener('click', (e) => {
         if (e.target.closest('.browse-item-fav')) return;
-        const idx = parseInt(el.dataset.songIdx);
+        if (DeleteState.selecting) {
+          toggleDeleteSelect(songs[idx].id, el);
+          return;
+        }
         playSong(songs[idx], songs, idx);
       });
     });
@@ -2520,9 +2655,21 @@ function buildSongRow(song, idx, artKey, showNum = false) {
 function attachSongRowListeners(container, songs, artKey) {
   container.querySelectorAll('[data-song-idx]').forEach(el => {
     const idx = parseInt(el.dataset.songIdx);
-    attachLongPress(el, () => openItemContextMenu('song', songs[idx]));
+    attachLongPress(el, () => {
+      // Long press: if already in select mode just toggle; else open context menu
+      if (DeleteState.selecting) {
+        toggleDeleteSelect(songs[idx].id, el);
+      } else {
+        openItemContextMenu('song', songs[idx]);
+      }
+    });
     el.addEventListener('click', e => {
       if (e.target.closest('.browse-item-fav')) return;
+      if (DeleteState.selecting) {
+        // In select mode: tap toggles selection
+        toggleDeleteSelect(songs[idx].id, el);
+        return;
+      }
       playSong(songs[idx], songs, idx);
     });
   });
@@ -3215,6 +3362,187 @@ function vizSetMode(mode) {
 window.addEventListener('resize', () => { if (Viz.active) vizResize(); });
 Audio.addEventListener('play',  vizSyncPlayPause);
 Audio.addEventListener('pause', vizSyncPlayPause);
+
+// ════════════════════════════════════════════════════════════════
+//  DELETE ENGINE
+// ════════════════════════════════════════════════════════════════
+const DeleteState = {
+  pending:  null,    // single song object OR array of songs
+  mode:     'single',// 'single' | 'multi'
+  selecting: false,  // multi-select active
+  selected: new Set(),// song IDs selected for deletion
+};
+
+// Open confirm modal for a single song or multi-selection
+function openDeleteConfirm(songs, mode) {
+  DeleteState.pending = songs;
+  DeleteState.mode    = mode || 'single';
+
+  const isMulti   = Array.isArray(songs);
+  const count     = isMulti ? songs.length : 1;
+  const msgEl     = document.getElementById('delete-modal-msg');
+  const labelEl   = document.getElementById('delete-confirm-label');
+  const subEl     = document.getElementById('delete-confirm-sub');
+
+  if (isMulti && count > 1) {
+    msgEl.textContent   = `This will permanently remove ${count} song${count !== 1 ? 's' : ''} from Google Drive. This cannot be undone.`;
+    labelEl.textContent = `Yes, delete ${count} songs`;
+  } else {
+    const name = isMulti ? songs[0].name : songs.name;
+    msgEl.textContent   = `"${name}" will be permanently removed from Google Drive. This cannot be undone.`;
+    labelEl.textContent = 'Yes, delete';
+  }
+  subEl.textContent = 'Files moved to Drive trash (recoverable from drive.google.com)';
+  document.getElementById('delete-modal').classList.add('active');
+}
+
+// Execute the actual deletion
+async function executeDelete() {
+  document.getElementById('delete-modal').classList.remove('active');
+
+  const songs = Array.isArray(DeleteState.pending)
+    ? DeleteState.pending
+    : [DeleteState.pending];
+
+  let done = 0, failed = 0;
+  showToast(`Deleting ${songs.length} song${songs.length !== 1 ? 's' : ''}…`);
+
+  for (const song of songs) {
+    try {
+      await driveDelete(song.id);
+      await sleep(100);
+      removeSongFromLibrary(song);
+      done++;
+    } catch(e) {
+      failed++;
+      console.warn('Delete failed for', song.name, e.message);
+    }
+  }
+
+  // Persist updated library
+  await dbSet('library', 'data', State.library);
+
+  // If the deleted song was playing, stop and go to library
+  if (State.currentSong && songs.some(s => s.id === State.currentSong.id)) {
+    Audio.pause();
+    Audio.src = '';
+    State.currentSong = null;
+    hideMiniPlayer();
+    showLibrary();
+  }
+
+  // Exit multi-select mode
+  exitDeleteSelect();
+
+  // Refresh current view
+  if (document.getElementById('browse-screen').classList.contains('active')) {
+    renderBrowse();
+  } else if (document.getElementById('library-screen').classList.contains('active')) {
+    renderLibraryTab(State.currentTab);
+  }
+
+  const msg = done > 0
+    ? `${done} song${done !== 1 ? 's' : ''} deleted${failed > 0 ? `, ${failed} failed` : ''}`
+    : `Delete failed`;
+  showToast(msg);
+}
+
+// Remove a song from in-memory library
+function removeSongFromLibrary(song) {
+  if (!State.library) return;
+  // Remove from allSongs
+  State.library.allSongs = State.library.allSongs.filter(s => s.id !== song.id);
+  // Remove from artist songs and album songs
+  for (const artist of State.library.artists) {
+    artist.songs = artist.songs.filter(s => s.id !== song.id);
+    for (const album of artist.albums) {
+      album.songs = album.songs.filter(s => s.id !== song.id);
+    }
+    // Remove empty albums
+    artist.albums = artist.albums.filter(a => a.songs.length > 0);
+  }
+  // Remove empty artists
+  State.library.artists = State.library.artists.filter(
+    a => a.songs.length > 0 || a.albums.length > 0
+  );
+  // Remove from queue
+  State.queue = State.queue.filter(s => s.id !== song.id);
+  if (State.queueIndex >= State.queue.length) State.queueIndex = 0;
+  // Remove from favorites
+  State.favorites.delete(song.id);
+  saveFavorites();
+}
+
+// ── Multi-select mode ────────────────────────────────────────
+function enterDeleteSelect() {
+  DeleteState.selecting = true;
+  DeleteState.selected  = new Set();
+  document.getElementById('delete-select-bar').classList.add('active');
+  updateDeleteBar();
+}
+
+function exitDeleteSelect() {
+  DeleteState.selecting = false;
+  DeleteState.selected  = new Set();
+  document.getElementById('delete-select-bar').classList.remove('active');
+  // Remove selection highlight from all items
+  document.querySelectorAll('.lib-item.delete-selected, .browse-item.delete-selected')
+    .forEach(el => el.classList.remove('delete-selected'));
+}
+
+function updateDeleteBar() {
+  const count = DeleteState.selected.size;
+  document.getElementById('dsb-count').textContent =
+    count === 0 ? 'Tap songs to select' : `${count} song${count !== 1 ? 's' : ''} selected`;
+  document.getElementById('dsb-delete-btn').disabled = count === 0;
+}
+
+function toggleDeleteSelect(songId, el) {
+  if (DeleteState.selected.has(songId)) {
+    DeleteState.selected.delete(songId);
+    el && el.classList.remove('delete-selected');
+  } else {
+    DeleteState.selected.add(songId);
+    el && el.classList.add('delete-selected');
+  }
+  updateDeleteBar();
+}
+
+// ── Delete from now-playing menu ─────────────────────────────
+document.getElementById('menu-delete-song').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  if (!State.currentSong) return;
+  openDeleteConfirm(State.currentSong, 'single');
+});
+
+// ── Delete confirm / cancel ──────────────────────────────────
+document.getElementById('delete-confirm-btn').addEventListener('click', executeDelete);
+
+document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('delete-modal').classList.remove('active');
+});
+
+document.getElementById('delete-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('delete-modal')) {
+    document.getElementById('delete-modal').classList.remove('active');
+  }
+});
+
+// ── Multi-select bar buttons ─────────────────────────────────
+document.getElementById('dsb-cancel-btn').addEventListener('click', () => {
+  exitDeleteSelect();
+  if (document.getElementById('library-screen').classList.contains('active')) {
+    renderLibraryTab(State.currentTab);
+  } else if (document.getElementById('browse-screen').classList.contains('active')) {
+    renderBrowse();
+  }
+});
+
+document.getElementById('dsb-delete-btn').addEventListener('click', () => {
+  if (!DeleteState.selected.size) return;
+  const songs = State.library.allSongs.filter(s => DeleteState.selected.has(s.id));
+  openDeleteConfirm(songs, 'multi');
+});
 
 // ════════════════════════════════════════════════════════════════
 //  EVENT WIRING
@@ -4320,9 +4648,7 @@ async function markMissingArt(elId, artKey) {
 // ════════════════════════════════════════════════════════════════
 //  ARTWORK FIX MODAL EVENT WIRING
 // ════════════════════════════════════════════════════════════════
-document.getElementById('art-fix-search-btn').addEventListener('click', () => {
-  searchArtworkCandidates();
-});
+// art-fix-search-btn removed — search triggers automatically on open
 
 document.getElementById('art-fix-save-btn').addEventListener('click', () => {
   applySelectedArtwork();
@@ -4351,6 +4677,9 @@ function openItemContextMenu(type, item) {
   const artworkBtn= document.getElementById('ctx-artwork-btn');
   const renameSub = document.getElementById('ctx-rename-sub');
 
+  // Reset delete btn visibility
+  document.getElementById('ctx-delete-btn').style.display = 'none';
+
   if (type === 'artist') {
     titleEl.textContent = item.name;
     artworkBtn.style.display = 'flex';
@@ -4363,6 +4692,7 @@ function openItemContextMenu(type, item) {
     titleEl.textContent = item.name;
     artworkBtn.style.display = 'none'; // songs don't have separate artwork fix
     renameSub.textContent = 'Rename song file on Drive';
+    document.getElementById('ctx-delete-btn').style.display = 'flex';
   }
 
   document.getElementById('ctx-menu-modal').classList.add('active');
@@ -4376,6 +4706,13 @@ document.getElementById('ctx-rename-btn').addEventListener('click', () => {
 document.getElementById('ctx-artwork-btn').addEventListener('click', () => {
   document.getElementById('ctx-menu-modal').classList.remove('active');
   openArtworkFixModal(CtxMenu.type, CtxMenu.item);
+});
+
+document.getElementById('ctx-delete-btn').addEventListener('click', () => {
+  document.getElementById('ctx-menu-modal').classList.remove('active');
+  if (CtxMenu.type === 'song' && CtxMenu.item) {
+    openDeleteConfirm(CtxMenu.item, 'single');
+  }
 });
 
 document.getElementById('ctx-cancel-btn').addEventListener('click', () => {
