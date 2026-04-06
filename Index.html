@@ -459,4 +459,4463 @@
   /* ─── LOADING OVERLAY ─── */
   .loading-indicator {
     position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
-    width:24px; height:24px; z-index
+    width:24px; height:24px; z-index:20;
+    border:2px solid var(--border); border-top-color:var(--accent);
+    border-radius:50%; animation:spin 0.8s linear infinite;
+    opacity:0; transition:opacity 0.2s;
+  }
+  .loading-indicator.show { opacity:1; }
+
+  /* ─── FAVORITES BADGE ─── */
+  .fav-count {
+    position:absolute; top:-4px; right:-4px;
+    background:var(--accent); color:#000;
+    font-size:9px; font-weight:700; width:16px; height:16px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+
+  .icon-btn-wrap { position:relative; }
+
+  /* Search bar */
+  .lib-search {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 16px; border-bottom:1px solid var(--border);
+    background:var(--bg);
+  }
+  .lib-search input {
+    flex:1; background:var(--surface2); border:none; border-radius:8px;
+    padding:8px 14px; font-size:14px; color:var(--text); font-family:'DM Sans',sans-serif;
+    outline:none;
+  }
+  .lib-search input::placeholder { color:var(--text3); }
+
+  /* Section letter */
+  .lib-section-letter {
+    padding:6px 20px 2px; font-size:11px; font-weight:700;
+    color:var(--accent); letter-spacing:1px; background:var(--bg);
+    position:sticky; top:0; z-index:2;
+  }
+
+  /* Empty state */
+  .empty-state {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:60px 40px; gap:16px; text-align:center; color:var(--text3);
+  }
+  .empty-state svg { opacity:0.3; }
+  .empty-state p { font-size:14px; line-height:1.6; }
+
+  /* Smooth transitions between screens */
+  .screen { transition:opacity 0.2s; }
+
+
+  /* ─── ARTWORK FIX MODAL ─── */
+  #artwork-fix-modal .modal-sheet { padding-bottom: calc(20px + var(--safe-bottom,0px)); }
+  .art-fix-preview {
+    display:flex; align-items:center; gap:14px;
+    padding:16px 20px 8px;
+  }
+  .art-fix-thumb {
+    width:56px; height:56px; border-radius:8px; background:var(--surface3);
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:22px; overflow:hidden;
+  }
+  .art-fix-thumb img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
+  .art-fix-thumb-info { flex:1; min-width:0; }
+  .art-fix-thumb-name { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .art-fix-thumb-sub  { font-size:12px; color:var(--text2); margin-top:2px; }
+  .art-fix-status {
+    margin:8px 20px 4px; padding:10px 14px; border-radius:10px;
+    background:var(--surface2); font-size:12px; color:var(--text2);
+    min-height:36px; display:flex; align-items:center; gap:10px;
+  }
+  .art-fix-status .spin {
+    width:14px; height:14px; border-radius:50%; flex-shrink:0;
+    border:2px solid var(--border); border-top-color:var(--accent);
+    animation:spin 0.7s linear infinite; display:none;
+  }
+  .art-fix-status.loading .spin { display:block; }
+  .art-fix-results {
+    display:flex; gap:8px; overflow-x:auto; padding:8px 20px 4px;
+    scrollbar-width:none;
+  }
+  .art-fix-results::-webkit-scrollbar { display:none; }
+  .art-result-card {
+    flex-shrink:0; cursor:pointer; border-radius:10px; overflow:hidden;
+    border:2px solid transparent; transition:border-color 0.2s;
+    background:var(--surface3);
+  }
+  .art-result-card.selected { border-color:var(--accent); }
+  .art-result-card img { width:80px; height:80px; object-fit:cover; display:block; }
+  .art-result-card .arc-label {
+    font-size:9px; color:var(--text2); padding:3px 5px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;
+  }
+  .art-fix-actions { display:flex; gap:10px; padding:12px 20px 4px; }
+  .art-fix-btn {
+    flex:1; padding:12px; border-radius:10px; border:none; cursor:pointer;
+    font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif;
+    transition:transform 0.15s;
+  }
+  .art-fix-btn:active { transform:scale(0.96); }
+  .art-fix-btn.primary { background:var(--accent); color:#000; }
+  .art-fix-btn.secondary { background:var(--surface3); color:var(--text); }
+  .art-fix-btn:disabled { opacity:0.4; pointer-events:none; }
+
+  /* ─── RENAME MODAL ─── */
+  #rename-modal .modal-sheet { padding-bottom: calc(20px + var(--safe-bottom,0px)); }
+  .rename-modal-body { padding: 12px 20px 4px; }
+  .rename-modal-label {
+    font-size: 11px; font-weight: 700; color: var(--text3);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .rename-input-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2); border-radius: 10px;
+    padding: 10px 14px; border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .rename-input-wrap:focus-within { border-color: var(--accent); }
+  .rename-input {
+    flex: 1; background: none; border: none; outline: none;
+    font-size: 16px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    min-width: 0;
+  }
+  .rename-input::placeholder { color: var(--text3); }
+  .rename-clear-btn {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--surface3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text2); flex-shrink: 0; font-size: 12px;
+    transition: background 0.15s;
+  }
+  .rename-status {
+    margin: 8px 0 0; font-size: 12px; color: var(--text2);
+    min-height: 18px; display: flex; align-items: center; gap: 8px;
+  }
+  .rename-status .spin {
+    width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite; display: none;
+  }
+  .rename-status.loading .spin { display: block; }
+  .rename-actions { display: flex; gap: 10px; padding: 12px 20px 4px; }
+  .rename-btn {
+    flex: 1; padding: 13px; border-radius: 10px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    transition: transform 0.15s, opacity 0.2s;
+  }
+  .rename-btn:active { transform: scale(0.96); }
+  .rename-btn.primary { background: var(--accent); color: #000; }
+  .rename-btn.secondary { background: var(--surface3); color: var(--text); }
+  .rename-btn:disabled { opacity: 0.35; pointer-events: none; }
+
+  /* clean-names result panel */
+  #clean-result-panel {
+    position:fixed; inset:0; z-index:210;
+    background:rgba(0,0,0,0.97); display:none; flex-direction:column;
+    overflow:hidden;
+  }
+  #clean-result-panel.active { display:flex; }
+  .crp-header {
+    display:flex; align-items:center; gap:12px;
+    padding:52px 20px 12px; border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .crp-title { font-family:'DM Serif Display',serif; font-size:20px; flex:1; }
+  .crp-close {
+    width:36px; height:36px; border-radius:50%; background:var(--surface2);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .crp-list { flex:1; overflow-y:auto; padding:0; }
+  .crp-item {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:12px 20px; border-bottom:1px solid #111;
+    transition: opacity 0.2s;
+  }
+  .crp-item.deselected { opacity:0.38; }
+  .crp-cb-wrap { flex-shrink:0; padding-top:2px; }
+  .crp-cb {
+    width:20px; height:20px; border-radius:5px;
+    border:2px solid var(--border); background:transparent;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:border-color 0.15s, background 0.15s;
+    flex-shrink:0;
+  }
+  .crp-cb.checked { border-color:var(--accent); background:var(--accent); }
+  .crp-cb.checked svg { display:block; }
+  .crp-cb svg { display:none; }
+  .crp-item-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .crp-item-type { font-size:10px; color:var(--accent); letter-spacing:1px; text-transform:uppercase; }
+  .crp-item-old { font-size:12px; color:var(--text3); text-decoration:line-through; word-break:break-word; }
+  .crp-item-new { font-size:13px; font-weight:500; color:var(--text); word-break:break-word; }
+  .crp-item-source { font-size:10px; color:var(--text3); }
+  .crp-item-error { font-size:12px; color:#e05555; }
+  .crp-item-skip { opacity:0.5; }
+  /* select-all header row */
+  .crp-select-all-row {
+    display:flex; align-items:center; gap:12px;
+    padding:10px 20px; border-bottom:2px solid var(--border);
+    background:var(--surface2); position:sticky; top:0; z-index:2;
+  }
+  .crp-select-all-label { font-size:12px; font-weight:600; color:var(--text2); letter-spacing:0.5px; cursor:pointer; }
+  .crp-select-all-count { font-size:11px; color:var(--text3); margin-left:auto; }
+  .crp-footer {
+    padding:16px 20px calc(16px + var(--safe-bottom,0px));
+    border-top:1px solid var(--border); flex-shrink:0;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .crp-summary { font-size:13px; color:var(--text2); text-align:center; }
+  .crp-apply-btn {
+    background:var(--accent); color:#000; border:none; border-radius:50px;
+    padding:14px; font-size:15px; font-weight:700; cursor:pointer;
+    font-family:'DM Sans',sans-serif; transition:transform 0.15s;
+  }
+  .crp-apply-btn:active { transform:scale(0.97); }
+  .crp-apply-btn:disabled { opacity:0.4; pointer-events:none; }
+  .crp-cancel-btn {
+    background:var(--surface3); color:var(--text); border:none; border-radius:50px;
+    padding:12px; font-size:14px; font-weight:600; cursor:pointer;
+    font-family:'DM Sans',sans-serif;
+  }
+
+  /* long-press ripple on browse items */
+  .browse-item.longpress-active { background:var(--surface2); }
+
+  /* artwork missing indicator dot */
+  .no-art-dot {
+    width:6px; height:6px; border-radius:50%; background:#e8a030;
+    position:absolute; bottom:2px; right:2px; pointer-events:none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    /* already dark */
+  }
+</style>
+<!-- Google Identity Services — handles auto sign-in + One Tap -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<!-- ─── AUTH / AUTO-LOADING SCREEN ─── -->
+<div id="auth-screen" class="screen active">
+  <div class="auth-logo">
+    <svg viewBox="0 0 64 64" fill="none">
+      <circle cx="32" cy="32" r="31" stroke="#e8c97a" stroke-width="1.5"/>
+      <path d="M18 32 C18 23.2 24.3 16 32 16 C39.7 16 46 23.2 46 32"
+        stroke="#e8c97a" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      <rect x="14" y="31" width="7" height="12" rx="3.5" fill="#e8c97a"/>
+      <rect x="43" y="31" width="7" height="12" rx="3.5" fill="#e8c97a"/>
+    </svg>
+    <div class="auth-title">DrivePlayer</div>
+    <div class="auth-sub">Stream from Google Drive</div>
+  </div>
+
+  <!-- Spinner shown while auto-sign-in is in progress -->
+  <div class="auth-spinner" id="auth-spinner"></div>
+  <div class="auth-status" id="auth-status">Signing in…</div>
+
+  <!-- Fallback button — only shown if auto-sign-in fails or user declines One Tap -->
+  <button class="auth-btn" id="sign-in-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+      <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
+    Sign in with Google
+  </button>
+</div>
+
+<!-- ─── SCAN ─── -->
+<div id="scan-screen" class="screen">
+  <div class="scan-ring"></div>
+  <div class="scan-progress" id="scan-count">0</div>
+  <div class="scan-label" id="scan-label">Scanning your MUSIC folder…</div>
+  <div class="scan-detail" id="scan-detail"></div>
+</div>
+
+<!-- ─── LIBRARY ─── -->
+<div id="library-screen" class="screen">
+  <div class="lib-header">
+    <!-- LEFT: invisible logout trigger + Library title -->
+    <div class="lib-header-left">
+      <button id="lib-logout-btn" aria-hidden="true" tabindex="-1"
+        style="position:absolute;width:0;height:0;opacity:0;overflow:hidden;border:none;padding:0;margin:0;pointer-events:none;"
+        onclick="showLogoutModal()"></button>
+      <div class="lib-title" id="lib-title-text"
+        title="Long press to sign out"
+        style="cursor:default;user-select:none;">Library</div>
+    </div>
+
+    <!-- CENTER: Shuffle Master pill — truly centred by grid -->
+    <div class="lib-header-center">
+      <button class="lib-shuffle-all-btn" id="lib-shuffle-all-btn" title="Shuffle all songs randomly">
+        Shuffle Master
+      </button>
+    </div>
+
+    <!-- RIGHT: Favorites + Rescan on same row -->
+    <div class="lib-header-right">
+      <div class="icon-btn-wrap">
+        <button class="player-top-btn" id="fav-lib-btn" title="Favorites" style="background:none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="fav-count" id="fav-count-badge" style="display:none">0</span>
+        </button>
+      </div>
+      <button class="player-top-btn" id="lib-rescan-btn" title="Rescan" style="background:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="lib-tabs">
+    <div class="lib-tab active" data-tab="artists">Artists</div>
+    <div class="lib-tab" data-tab="albums">Albums</div>
+    <div class="lib-tab" data-tab="songs">Songs</div>
+    <div class="lib-tab" data-tab="favorites">Favorites</div>
+  </div>
+  <div class="lib-search">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="lib-search-input" placeholder="Search artists, albums, songs…"/>
+  </div>
+  <div class="lib-list" id="lib-list"></div>
+</div>
+
+<!-- ─── BROWSE (Artist/Album drill) ─── -->
+<div id="browse-screen" class="screen">
+  <div class="browse-header">
+    <div class="browse-back" id="browse-back-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div>
+      <div class="browse-title" id="browse-title">Artist</div>
+      <div class="browse-subtitle" id="browse-subtitle"></div>
+    </div>
+  </div>
+  <div class="browse-hero" id="browse-hero">
+    <div class="browse-hero-art" id="browse-hero-art">🎵</div>
+    <div class="browse-hero-name" id="browse-hero-name"></div>
+    <div class="browse-hero-sub" id="browse-hero-sub"></div>
+    <div class="browse-actions" id="browse-actions">
+      <button class="browse-btn primary" id="browse-play-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Play All
+      </button>
+      <button class="browse-btn secondary" id="browse-shuffle-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+        Shuffle
+      </button>
+    </div>
+  </div>
+  <div class="browse-list" id="browse-list"></div>
+</div>
+
+<!-- ─── PLAYER ─── -->
+<div id="player-screen" class="screen">
+  <div class="player-bg" id="player-bg"></div>
+  <div class="player-overlay"></div>
+
+  <!-- Top bar -->
+  <div class="player-top">
+    <button class="player-top-btn" id="player-back-to-lib">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="player-context">
+      <div class="player-context-label" id="player-context-label">Now Playing</div>
+      <div class="player-context-name" id="player-context-name"></div>
+    </div>
+    <button class="player-top-btn" id="player-shuffle-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+    </button>
+    <button class="player-top-btn" id="player-viz-btn" title="Visualizer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="14" width="3" height="8" rx="1"/><rect x="7" y="9" width="3" height="13" rx="1"/>
+        <rect x="12" y="5" width="3" height="17" rx="1"/><rect x="17" y="11" width="3" height="11" rx="1"/>
+      </svg>
+    </button>
+    <button class="player-top-btn" id="player-menu-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <!-- Art -->
+  <div class="player-art-wrap">
+    <div class="player-art" id="player-art">🎵</div>
+  </div>
+  <div class="loading-indicator" id="player-loading"></div>
+
+  <!-- Info -->
+  <div class="player-info">
+    <div class="player-info-text">
+      <div class="player-track" id="player-track-name">—</div>
+      <div class="player-artist" id="player-artist-name">—</div>
+    </div>
+    <div class="player-fav-btn" id="player-fav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="player-progress">
+    <div class="progress-bar-wrap" id="progress-bar">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+      <div class="progress-thumb" id="progress-thumb"></div>
+    </div>
+    <div class="progress-times">
+      <span id="time-current">0:00</span>
+      <span id="time-total">0:00</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="player-controls">
+    <button class="ctrl-btn" id="ctrl-repeat">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    </button>
+    <button class="ctrl-btn" id="ctrl-prev">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+    </button>
+    <button class="ctrl-play" id="ctrl-play">
+      <svg id="play-icon" width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <svg id="pause-icon" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+    </button>
+    <button class="ctrl-btn" id="ctrl-next">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+    </button>
+    <button class="ctrl-btn" id="ctrl-lib">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    </button>
+  </div>
+
+  <!-- Queue strip -->
+  <div class="player-queue-strip">
+    <div class="queue-strip-scroll" id="queue-strip"></div>
+  </div>
+</div>
+
+<!-- ─── MODALS ─── -->
+<div class="modal-overlay" id="shuffle-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Shuffle</div>
+    <div class="modal-item" id="shuffle-folder-btn">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+      <div><div class="modal-item-label">Shuffle this folder</div><div class="modal-item-sub" id="shuffle-folder-name">Current selection</div></div>
+    </div>
+    <div class="modal-item" id="shuffle-all-btn">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></div>
+      <div><div class="modal-item-label">Shuffle all music</div><div class="modal-item-sub">Everything in your MUSIC folder</div></div>
+    </div>
+    <div class="modal-item" id="shuffle-cancel">
+      <div class="modal-item-icon" style="color:#888"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+      <div class="modal-item-label" style="color:#888">Cancel</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="menu-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Options</div>
+    <div class="modal-item" id="menu-fullscreen">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></div>
+      <div><div class="modal-item-label" id="fullscreen-label">Enter Fullscreen</div><div class="modal-item-sub">Immersive album art view</div></div>
+    </div>
+    <div class="modal-item" id="menu-sleep">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+      <div><div class="modal-item-label">Sleep Timer</div><div class="modal-item-sub" id="sleep-label">Stop playback after…</div></div>
+    </div>
+    <div class="modal-item" id="menu-rescan">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+      <div><div class="modal-item-label">Rescan Library</div><div class="modal-item-sub">Re-fetch from Google Drive</div></div>
+    </div>
+    <div class="modal-item" id="menu-clean-names">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      <div><div class="modal-item-label">Clean Names</div><div class="modal-item-sub">Remove artist/album from song &amp; album names</div></div>
+    </div>
+    <div class="modal-item" id="menu-delete-song">
+      <div class="modal-item-icon" style="color:#e05555;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <div><div class="modal-item-label" style="color:#e05555;">Delete Song</div>
+      <div class="modal-item-sub">Remove from Drive permanently</div></div>
+    </div>
+    <div class="modal-item" id="menu-cancel">
+      <div class="modal-item-icon" style="color:#888"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+      <div class="modal-item-label" style="color:#888">Cancel</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sleep-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Sleep Timer</div>
+    <div class="modal-item" data-sleep="15"><div class="modal-item-icon">🌙</div><div class="modal-item-label">15 minutes</div></div>
+    <div class="modal-item" data-sleep="30"><div class="modal-item-icon">🌙</div><div class="modal-item-label">30 minutes</div></div>
+    <div class="modal-item" data-sleep="45"><div class="modal-item-icon">🌙</div><div class="modal-item-label">45 minutes</div></div>
+    <div class="modal-item" data-sleep="60"><div class="modal-item-icon">🌙</div><div class="modal-item-label">1 hour</div></div>
+    <div class="modal-item" data-sleep="0"><div class="modal-item-icon" style="color:#888">✕</div><div class="modal-item-label" style="color:#888">Cancel timer</div></div>
+  </div>
+</div>
+
+
+<!-- ─── CLEAN NAMES PROGRESS OVERLAY (fixed — survives screen changes) ─── -->
+<div id="clean-screen" style="
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.96);
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:20px;padding:40px;
+">
+  <div class="scan-ring"></div>
+  <div class="scan-progress" id="clean-count">0</div>
+  <div class="scan-label" id="clean-label" style="text-align:center;">Scanning library…</div>
+  <div class="scan-detail" id="clean-detail" style="text-align:center;max-width:280px;word-break:break-word;"></div>
+  <div style="width:100%;max-width:340px;background:var(--surface2);border-radius:12px;padding:16px;margin-top:8px;">
+    <div style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Progress</div>
+    <div style="background:var(--surface3);border-radius:4px;height:4px;overflow:hidden;">
+      <div id="clean-bar" style="height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width 0.3s;"></div>
+    </div>
+    <div id="clean-stats" style="font-size:12px;color:var(--text2);margin-top:8px;">—</div>
+  </div>
+  <div id="clean-done-msg" style="display:none;text-align:center;padding:16px 24px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);max-width:300px;">
+    <div style="font-size:22px;margin-bottom:8px;">✅</div>
+    <div style="font-size:15px;font-weight:600;color:var(--accent);margin-bottom:4px;">All data has been updated</div>
+    <div id="clean-done-detail" style="font-size:13px;color:var(--text2);"></div>
+  </div>
+</div>
+
+<!-- ─── LOGOUT CONFIRM MODAL ─── -->
+<div class="modal-overlay" id="logout-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="font-size:16px;padding-bottom:6px;">Log Out?</div>
+    <div style="padding:0 20px 16px;font-size:14px;color:var(--text2);line-height:1.6;">
+      Are you sure you want to log out?
+    </div>
+    <div class="modal-item" id="logout-confirm-btn">
+      <div class="modal-item-icon" style="color:#e05555;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </div>
+      <div>
+        <div class="modal-item-label" style="color:#e05555;">Yes, get me out</div>
+        <div class="modal-item-sub">Return to the sign-in screen</div>
+      </div>
+    </div>
+    <div class="modal-item" id="logout-cancel-btn">
+      <div class="modal-item-icon" style="color:var(--accent);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </div>
+      <div>
+        <div class="modal-item-label">Oops, I didn't mean to do that</div>
+        <div class="modal-item-sub">Go back to the library</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── DELETE CONFIRM MODAL ─── -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:#e05555;">Delete?</div>
+    <div style="padding:0 20px 16px;font-size:14px;color:var(--text2);line-height:1.7;" id="delete-modal-msg">
+      This will remove this file permanently from Google Drive.
+    </div>
+    <div class="modal-item" id="delete-confirm-btn">
+      <div class="modal-item-icon" style="color:#e05555;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <div><div class="modal-item-label" style="color:#e05555;" id="delete-confirm-label">Yes, delete</div>
+      <div class="modal-item-sub" id="delete-confirm-sub">This cannot be undone</div></div>
+    </div>
+    <div class="modal-item" id="delete-cancel-btn">
+      <div class="modal-item-icon" style="color:var(--accent);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </div>
+      <div class="modal-item-label">No, keep it</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ITEM CONTEXT MENU ─── -->
+<div class="modal-overlay" id="ctx-menu-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="ctx-menu-title">Options</div>
+    <div class="modal-item" id="ctx-rename-btn">
+      <div class="modal-item-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="modal-item-label">Rename</div>
+        <div class="modal-item-sub" id="ctx-rename-sub">Change name on Drive</div>
+      </div>
+    </div>
+    <div class="modal-item" id="ctx-artwork-btn">
+      <div class="modal-item-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <div>
+        <div class="modal-item-label">Fix Artwork</div>
+        <div class="modal-item-sub">Search &amp; update album art</div>
+      </div>
+    </div>
+    <div class="modal-item" id="ctx-delete-btn" style="display:none;">
+      <div class="modal-item-icon" style="color:#e05555;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <div><div class="modal-item-label" style="color:#e05555;">Delete Song</div>
+      <div class="modal-item-sub">Remove from Drive permanently</div></div>
+    </div>
+    <div class="modal-item" id="ctx-cancel-btn">
+      <div class="modal-item-icon" style="color:#888">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+      <div class="modal-item-label" style="color:#888">Cancel</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── RENAME MODAL ─── -->
+<div class="modal-overlay" id="rename-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="rename-modal-title">Rename</div>
+    <div class="rename-modal-body">
+      <div class="rename-modal-label" id="rename-modal-label">New name</div>
+      <div class="rename-input-wrap">
+        <input class="rename-input" id="rename-input" type="text" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="words"/>
+        <button class="rename-clear-btn" id="rename-clear-btn">✕</button>
+      </div>
+      <div class="rename-status" id="rename-status">
+        <div class="spin"></div>
+        <span id="rename-status-text"></span>
+      </div>
+    </div>
+    <div class="rename-actions">
+      <button class="rename-btn secondary" id="rename-cancel-btn">Cancel</button>
+      <button class="rename-btn primary" id="rename-save-btn">Rename</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ARTWORK FIX MODAL ─── -->
+<div class="modal-overlay" id="artwork-fix-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="art-fix-modal-title">Fix Artwork</div>
+    <div class="art-fix-preview">
+      <div class="art-fix-thumb" id="art-fix-thumb">💿</div>
+      <div class="art-fix-thumb-info">
+        <div class="art-fix-thumb-name" id="art-fix-name">—</div>
+        <div class="art-fix-thumb-sub" id="art-fix-sub">—</div>
+      </div>
+    </div>
+    <div class="art-fix-status" id="art-fix-status">
+      <div class="spin"></div>
+      <span id="art-fix-status-text">Searching…</span>
+    </div>
+    <div class="art-fix-results" id="art-fix-results"></div>
+    <div class="art-fix-actions">
+      <button class="art-fix-btn primary" id="art-fix-save-btn" disabled>Apply</button>
+      <button class="art-fix-btn secondary" id="art-fix-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CLEAN NAMES RESULT PANEL ─── -->
+<div id="clean-result-panel">
+  <div class="crp-header">
+    <div class="crp-title">Review Changes</div>
+    <div class="crp-close" id="crp-close-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+  </div>
+  <div class="crp-list" id="crp-list"></div>
+  <div class="crp-footer">
+    <div class="crp-summary" id="crp-summary"></div>
+    <button class="crp-apply-btn" id="crp-apply-btn">Apply All Changes to Drive</button>
+    <button class="crp-cancel-btn" id="crp-cancel-btn">Discard</button>
+  </div>
+</div>
+
+<!-- ─── MINI PLAYER BANNER ─── -->
+<div id="mini-player">
+  <div class="mini-progress"><div class="mini-progress-fill" id="mini-progress-fill"></div></div>
+  <div class="mini-body" id="mini-body">
+    <div class="mini-art" id="mini-art">🎵</div>
+    <div class="mini-info">
+      <div class="mini-title" id="mini-title">—</div>
+      <div class="mini-artist" id="mini-artist">—</div>
+    </div>
+    <div class="mini-controls">
+      <button class="mini-btn" id="mini-prev-btn" title="Previous">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+      </button>
+      <button class="mini-play-btn" id="mini-play-btn" title="Play/Pause">
+        <svg id="mini-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <svg id="mini-pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="mini-btn" id="mini-next-btn" title="Next">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── VISUALIZER OVERLAY ─── -->
+<div id="viz-overlay" style="
+  position:fixed;inset:0;z-index:300;
+  background:#000;
+  display:none;flex-direction:column;
+">
+  <!-- canvas fills top portion -->
+  <canvas id="viz-canvas" style="flex:1;width:100%;display:block;"></canvas>
+
+  <!-- bottom HUD: track info + controls + options -->
+  <div id="viz-hud" style="
+    padding:16px 20px calc(16px + env(safe-area-inset-bottom,0px));
+    background:linear-gradient(transparent,rgba(0,0,0,0.9) 30%);
+    display:flex;flex-direction:column;gap:12px;
+  ">
+    <!-- Track info -->
+    <div style="text-align:center;">
+      <div id="viz-track" style="font-family:'DM Serif Display',serif;font-size:18px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div id="viz-artist" style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px;"></div>
+    </div>
+
+    <!-- Controls row -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:20px;">
+      <button id="viz-prev" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);padding:8px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+      </button>
+      <button id="viz-play" style="width:52px;height:52px;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:50%;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+        <svg id="viz-play-icon"  width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <svg id="viz-pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button id="viz-next" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);padding:8px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      </button>
+    </div>
+
+    <!-- Options row: mode + colour + close -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <div style="display:flex;gap:6px;">
+        <button class="viz-mode-btn active" data-mode="stars" style="font-size:10px;padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.12);color:#fff;cursor:pointer;letter-spacing:0.5px;">Stars</button>
+        <button class="viz-mode-btn" data-mode="bars"  style="font-size:10px;padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.55);cursor:pointer;letter-spacing:0.5px;">Bars</button>
+        <button class="viz-mode-btn" data-mode="vortex" style="font-size:10px;padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.55);cursor:pointer;letter-spacing:0.5px;">Vortex</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:0.5px;cursor:pointer;">
+          Colour
+          <input id="viz-color-picker" type="color" value="#e8c97a" style="width:28px;height:20px;border:none;background:none;cursor:pointer;vertical-align:middle;margin-left:4px;border-radius:4px;padding:0 2px;">
+        </label>
+        <button id="viz-close" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:#fff;font-size:11px;padding:5px 12px;cursor:pointer;letter-spacing:0.5px;">✕ Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MULTI-DELETE SELECT BAR ─── -->
+<div class="delete-select-bar" id="delete-select-bar">
+  <div class="dsb-count" id="dsb-count">0 selected</div>
+  <button class="dsb-btn dsb-cancel" id="dsb-cancel-btn">Cancel</button>
+  <button class="dsb-btn dsb-delete" id="dsb-delete-btn">Delete</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  CONFIGURATION — Replace these with your real values
+// ════════════════════════════════════════════════════════════════
+const CONFIG = {
+  CLIENT_ID: '1054373546438-khbk4asdohgfdhon3q7j9cfj63ha02qt.apps.googleusercontent.com',
+  // drive.file = create/edit files the app opens; metadata = rename any file/folder
+  SCOPES: 'https://www.googleapis.com/auth/drive',
+  // Name of your root music folder in Drive
+  MUSIC_FOLDER_NAME: 'MUSIC',
+  // MusicBrainz user agent (put your app name + email)
+  MB_USER_AGENT: 'DrivePlayer/1.0 (your@email.com)',
+  // DB version
+  DB_VERSION: 2,
+  DB_NAME: 'DrivePlayerDB',
+};
+
+// ════════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════════
+const State = {
+  token: null,
+  tokenExpiry: 0,
+  library: null,          // { artists: [...], allSongs: [...] }
+  queue: [],              // current playback queue
+  queueIndex: 0,
+  isPlaying: false,
+  isShuffleOn: false,
+  playedIds: new Set(),   // smart shuffle history
+  shuffleHistory: [],     // ordered history for prev track in shuffle
+  repeatMode: 0,          // 0=off 1=all 2=one
+  favorites: new Set(),
+  currentSong: null,
+  browseStack: [],        // navigation stack [{type:'artist',data}, {type:'album',data}]
+  currentTab: 'artists',
+  isFullscreen: false,
+  sleepTimer: null,
+  sleepMinutes: 0,
+  db: null,
+  firstLaunch: false,
+  cleanRunning: false,   // true while clean-names scan/apply is active
+};
+
+// ════════════════════════════════════════════════════════════════
+//  INDEXEDDB
+// ════════════════════════════════════════════════════════════════
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(CONFIG.DB_NAME, CONFIG.DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta');
+      if (!db.objectStoreNames.contains('artwork')) db.createObjectStore('artwork');
+      if (!db.objectStoreNames.contains('library')) db.createObjectStore('library');
+    };
+    req.onsuccess = e => res(e.target.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+function dbGet(store, key) {
+  return new Promise((res, rej) => {
+    const tx = State.db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).get(key);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+function dbSet(store, key, val) {
+  return new Promise((res, rej) => {
+    const tx = State.db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(val, key);
+    req.onsuccess = () => res();
+    req.onerror = () => rej(req.error);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  GOOGLE IDENTITY SERVICES — CLEAN SINGLE-PATH AUTO SIGN-IN
+// ════════════════════════════════════════════════════════════════
+
+let _gisTokenClient  = null;
+let _gisInitialized  = false;
+let _authInProgress  = false; // guard against double calls
+
+// Safety no-op — One Tap div is removed but kept in case GIS fires it
+function gisOneTapCallback(response) { /* handled by token client below */ }
+
+// GIS library calls this when it finishes loading
+window.onGoogleLibraryLoad = function() {
+  _gisTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.CLIENT_ID,
+    scope:     CONFIG.SCOPES,
+    callback:  onGisToken,   // single, stable callback reference
+  });
+  _gisInitialized = true;
+};
+
+// Single token callback — called by GIS after silent OR interactive sign-in
+function onGisToken(resp) {
+  _authInProgress = false;
+  if (resp.error || !resp.access_token) {
+    // Silent sign-in failed → show manual button (user hasn't consented yet)
+    showAuthFallback('Tap below to sign in with Google');
+    return;
+  }
+  // Store token in localStorage (survives page reloads)
+  const expiresIn = parseInt(resp.expires_in || '3600');
+  State.token       = resp.access_token;
+  State.tokenExpiry = Date.now() + expiresIn * 1000 - 60000;
+  localStorage.setItem('dp_token',  State.token);
+  localStorage.setItem('dp_expiry', State.tokenExpiry);
+  // Go straight to the app — no second sign-in screen
+  enterApp();
+}
+
+// Kick off a token request — silent by default, interactive if forced
+function requestAccessToken(forcePrompt) {
+  if (!_gisTokenClient || _authInProgress) return;
+  _authInProgress = true;
+  _gisTokenClient.requestAccessToken({ prompt: forcePrompt ? 'select_account' : '' });
+}
+
+// Load a still-valid token from localStorage
+function loadStoredToken() {
+  const token  = localStorage.getItem('dp_token');
+  const expiry = parseInt(localStorage.getItem('dp_expiry') || '0');
+  if (token && expiry > Date.now()) {
+    State.token       = token;
+    State.tokenExpiry = expiry;
+    return true;
+  }
+  return false;
+}
+
+// Show spinner + hide sign-in button (reset auth screen to loading state)
+function showAuthLoading(msg) {
+  document.getElementById('auth-spinner').style.display = '';
+  document.getElementById('auth-status').textContent    = msg || 'Signing in…';
+  document.getElementById('sign-in-btn').classList.remove('visible');
+}
+
+// Show manual sign-in button (auto sign-in unavailable)
+function showAuthFallback(msg) {
+  document.getElementById('auth-spinner').style.display = 'none';
+  document.getElementById('auth-status').textContent    = msg || 'Tap to sign in';
+  document.getElementById('sign-in-btn').classList.add('visible');
+}
+
+// Manual sign-in button click → interactive account picker
+document.getElementById('sign-in-btn').addEventListener('click', () => {
+  showAuthLoading('Signing in…');
+  // GIS may still be loading — poll briefly then request
+  if (_gisInitialized) {
+    requestAccessToken(true);
+  } else {
+    const wait = setInterval(() => {
+      if (_gisInitialized) { clearInterval(wait); requestAccessToken(true); }
+    }, 200);
+    setTimeout(() => clearInterval(wait), 8000);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+//  DRIVE API HELPERS
+// ════════════════════════════════════════════════════════════════
+async function driveRequest(url, opts = {}) {
+  const resp = await fetch(url, {
+    ...opts,
+    headers: { Authorization: `Bearer ${State.token}`, ...(opts.headers || {}) }
+  });
+  if (!resp.ok) throw new Error(`Drive API error: ${resp.status}`);
+  return resp.json();
+}
+
+// Rename a Drive file or folder (requires drive scope)
+// Delete a Drive file (moves to trash — recoverable from Drive web UI)
+async function driveDelete(fileId) {
+  const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/trash`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${State.token}` },
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Delete error: ${resp.status}`);
+  }
+}
+
+async function driveRename(fileId, newName) {
+  const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${State.token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name: newName }),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Drive rename error: ${resp.status}`);
+  }
+  return resp.json();
+}
+
+async function listFiles(parentId, mimeTypeFilter = null) {
+  let results = [], pageToken = null;
+  do {
+    let q = `'${parentId}' in parents and trashed=false`;
+    if (mimeTypeFilter) q += ` and mimeType='${mimeTypeFilter}'`;
+    const params = new URLSearchParams({ q, fields:'files(id,name,mimeType,size)', pageSize: 1000 });
+    if (pageToken) params.set('pageToken', pageToken);
+    const data = await driveRequest(`https://www.googleapis.com/drive/v3/files?${params}`);
+    results = results.concat(data.files || []);
+    pageToken = data.nextPageToken;
+  } while (pageToken);
+  return results;
+}
+
+async function findFolder(name, parentId = null) {
+  let q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  if (parentId) q += ` and '${parentId}' in parents`;
+  const params = new URLSearchParams({ q, fields:'files(id,name)', pageSize: 10 });
+  const data = await driveRequest(`https://www.googleapis.com/drive/v3/files?${params}`);
+  return data.files && data.files[0] ? data.files[0] : null;
+}
+
+function isAudioFile(name) {
+  return /\.(mp3|flac|ogg|opus|m4a|aac|wav|wma|ape|alac)$/i.test(name);
+}
+
+function isImageFile(name) {
+  return /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(name);
+}
+
+// Fetch a Drive image file and return it as a base64 data URL
+async function fetchDriveImageAsBase64(fileId) {
+  try {
+    const resp = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      { headers: { Authorization: `Bearer ${State.token}` } }
+    );
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    return new Promise(res => {
+      const reader = new FileReader();
+      reader.onloadend = () => res(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
+function getStreamUrl(fileId) {
+  return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+}
+
+// Fetch audio as blob and return object URL for playback
+async function getPlayableUrl(fileId) {
+  const resp = await fetch(getStreamUrl(fileId), {
+    headers: { Authorization: `Bearer ${State.token}` }
+  });
+  if (!resp.ok) throw new Error(`Stream error: ${resp.status}`);
+  const blob = await resp.blob();
+  return URL.createObjectURL(blob);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  LIBRARY SCANNER
+// ════════════════════════════════════════════════════════════════
+async function scanLibrary() {
+  showScreen('scan-screen');
+  const scanLabel = document.getElementById('scan-label');
+  const scanDetail = document.getElementById('scan-detail');
+  const scanCount = document.getElementById('scan-count');
+
+  scanLabel.textContent = 'Finding MUSIC folder…';
+  const musicFolder = await findFolder(CONFIG.MUSIC_FOLDER_NAME);
+  if (!musicFolder) {
+    scanLabel.textContent = `Could not find a folder named "${CONFIG.MUSIC_FOLDER_NAME}" in your Drive.`;
+    return;
+  }
+
+  scanLabel.textContent = 'Scanning artists…';
+  const topLevel = await listFiles(musicFolder.id);
+  const folderItems = topLevel.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
+  const rootSongs = topLevel.filter(f => isAudioFile(f.name));
+
+  const artists = [];
+  const allSongs = [];
+  let count = 0;
+
+  // Collect songs at root level (no artist folder)
+  if (rootSongs.length > 0) {
+    const songs = rootSongs.map(f => ({
+      id: f.id, name: cleanName(f.name), fileName: f.name,
+      artist: 'Unknown Artist', album: 'Unknown Album',
+      artistId: '__root__', albumId: '__root__',
+      artKey: null,
+    }));
+    allSongs.push(...songs);
+    count += songs.length;
+    scanCount.textContent = count;
+  }
+
+  // Artist folders
+  for (const artistFolder of folderItems) {
+    scanDetail.textContent = artistFolder.name;
+    const artistData = {
+      id: artistFolder.id,
+      name: artistFolder.name,
+      albums: [],
+      songs: [], // songs directly under artist (no album folder)
+    };
+
+    const artistContents = await listFiles(artistFolder.id);
+    const albumFolders = artistContents.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
+    const artistRootSongs = artistContents.filter(f => isAudioFile(f.name));
+
+    // Songs directly under artist
+    artistRootSongs.forEach((f, i) => {
+      const song = {
+        id: f.id, name: cleanName(f.name), fileName: f.name,
+        artist: artistFolder.name, album: '',
+        artistId: artistFolder.id, albumId: artistFolder.id,
+        artKey: `artist_${artistFolder.id}`,
+        track: i + 1,
+      };
+      artistData.songs.push(song);
+      allSongs.push(song);
+    });
+
+    // Album folders
+    for (const albumFolder of albumFolders) {
+      const albumData = {
+        id: albumFolder.id,
+        name: albumFolder.name,
+        artist: artistFolder.name,
+        artistId: artistFolder.id,
+        songs: [],
+        artKey: `album_${albumFolder.id}`,
+      };
+
+      const albumContents = await listFiles(albumFolder.id);
+      const albumSongs = albumContents.filter(f => isAudioFile(f.name));
+
+      albumSongs.forEach((f, i) => {
+        const song = {
+          id: f.id, name: cleanName(f.name), fileName: f.name,
+          artist: artistFolder.name, album: albumFolder.name,
+          artistId: artistFolder.id, albumId: albumFolder.id,
+          artKey: `album_${albumFolder.id}`,
+          track: i + 1,
+        };
+        albumData.songs.push(song);
+        allSongs.push(song);
+        count++;
+      });
+
+      scanCount.textContent = count;
+      artistData.albums.push(albumData);
+    }
+
+    if (artistData.albums.length > 0 || artistData.songs.length > 0) {
+      artists.push(artistData);
+    }
+  }
+
+  artists.sort((a, b) => a.name.localeCompare(b.name));
+
+  const library = { artists, allSongs, scannedAt: Date.now(), musicFolderId: musicFolder.id };
+  State.library = library;
+
+  // If first launch, fetch missing metadata
+  const isFirst = State.firstLaunch;
+  if (isFirst) {
+    scanLabel.textContent = 'Fetching missing artwork…';
+    await fetchMissingArtwork(library, scanDetail, scanCount);
+  }
+
+  await dbSet('library', 'data', library);
+  await dbSet('meta', 'firstLaunch', false);
+
+  showLibrary();
+  // Ensure sentinel is in place after scan completes
+  if (typeof pushBackSentinel === 'function') pushBackSentinel();
+}
+
+function cleanName(filename) {
+  return filename
+    .replace(/\.(mp3|flac|ogg|opus|m4a|aac|wav|wma|ape|alac)$/i, '')
+    .replace(/^\d+[\s.\-_]+/, '')
+    .trim();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  METADATA / ARTWORK FETCHING (MusicBrainz + Cover Art Archive)
+// ════════════════════════════════════════════════════════════════
+async function fetchMissingArtwork(library, detailEl, countEl) {
+  const processed = new Set();
+
+  for (const artist of library.artists) {
+    if (processed.has(artist.id)) continue;
+    processed.add(artist.id);
+
+    if (detailEl) detailEl.textContent = `Scanning artwork: ${artist.name}`;
+
+    for (const album of artist.albums) {
+      const albumKey = `album_${album.id}`;
+      const existingAlbumArt = await dbGet('artwork', albumKey);
+      if (existingAlbumArt) continue; // already cached
+
+      let art = null;
+
+      // ── Step 1: Look for an image file inside the album folder ──
+      try {
+        const albumContents = await listFiles(album.id);
+        const imgFile = albumContents.find(f => isImageFile(f.name));
+        if (imgFile) {
+          if (detailEl) detailEl.textContent = `Found folder art: ${album.name}`;
+          art = await fetchDriveImageAsBase64(imgFile.id);
+        }
+      } catch(e) { /* continue to online fallback */ }
+
+      // ── Step 2: If no folder image, search online ──
+      if (!art) {
+        try {
+          await sleep(300);
+          if (detailEl) detailEl.textContent = `Online search: ${album.name}`;
+          const mbData = await fetchMusicBrainzRelease(artist.name, album.name);
+          if (mbData && mbData.id) {
+            const artUrl = `https://coverartarchive.org/release/${mbData.id}/front-250`;
+            art = await fetchImageAsBase64(artUrl);
+          }
+        } catch(e) { /* skip */ }
+      }
+
+      if (art) {
+        await dbSet('artwork', albumKey, art);
+        // Use first album art as artist art if still missing
+        const artistArtExisting = await dbGet('artwork', `artist_${artist.id}`);
+        if (!artistArtExisting) {
+          await dbSet('artwork', `artist_${artist.id}`, art);
+        }
+      }
+    }
+  }
+}
+
+async function fetchMusicBrainzRelease(artist, album) {
+  try {
+    const q = encodeURIComponent(`release:"${album}" AND artist:"${artist}"`);
+    const url = `https://musicbrainz.org/ws/2/release/?query=${q}&limit=1&fmt=json`;
+    const resp = await fetch(url, { headers: { 'User-Agent': CONFIG.MB_USER_AGENT } });
+    const data = await resp.json();
+    return data.releases && data.releases[0];
+  } catch { return null; }
+}
+
+async function fetchImageAsBase64(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    return new Promise(res => {
+      const reader = new FileReader();
+      reader.onloadend = () => res(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+// ════════════════════════════════════════════════════════════════
+//  ARTWORK FIX — search, preview, apply
+// ════════════════════════════════════════════════════════════════
+
+// Context for the currently open fix modal
+const ArtFix = {
+  type: null,       // 'album' | 'artist'
+  item: null,       // album or artist object
+  artKey: null,
+  results: [],      // [{url, label, data}] fetched candidates
+  selectedIdx: -1,
+};
+
+async function openArtworkFixModal(type, item) {
+  ArtFix.type = type;
+  ArtFix.item = item;
+  ArtFix.artKey = type === 'album' ? `album_${item.id}` : `artist_${item.id}`;
+  ArtFix.results = [];
+  ArtFix.selectedIdx = -1;
+
+  const titleEl  = document.getElementById('art-fix-modal-title');
+  const thumbEl  = document.getElementById('art-fix-thumb');
+  const nameEl   = document.getElementById('art-fix-name');
+  const subEl    = document.getElementById('art-fix-sub');
+  const statusEl = document.getElementById('art-fix-status');
+  const statusTxt= document.getElementById('art-fix-status-text');
+  const resultsEl= document.getElementById('art-fix-results');
+  const saveBtn  = document.getElementById('art-fix-save-btn');
+
+  titleEl.textContent = type === 'album' ? 'Fix Album Artwork' : 'Fix Artist Artwork';
+  nameEl.textContent  = item.name;
+  subEl.textContent   = type === 'album' ? (item.artist || item.artistName || '') : `${item.albums ? item.albums.length : 0} albums`;
+  thumbEl.innerHTML   = type === 'album' ? '💿' : '🎤';
+  resultsEl.innerHTML = '';
+  saveBtn.disabled    = true;
+  statusEl.classList.remove('loading');
+  statusTxt.textContent = 'Tap "Search" to find artwork';
+
+  // Show current art in thumb if available
+  const existingArt = await dbGet('artwork', ArtFix.artKey);
+  if (existingArt) thumbEl.innerHTML = `<img src="${existingArt}" alt="art"/>`;
+
+  document.getElementById('artwork-fix-modal').classList.add('active');
+
+  // Auto-trigger search immediately — no need to tap Search
+  setTimeout(() => searchArtworkCandidates(), 150);
+}
+
+// ─── multi-source artwork search ─────────────────────────────
+
+// MusicBrainz: album releases
+async function fetchMBAlbumCandidates(artist, album) {
+  try {
+    const q = artist
+      ? encodeURIComponent(`release:"${album}" AND artist:"${artist}"`)
+      : encodeURIComponent(`release:"${album}"`);
+    const url = `https://musicbrainz.org/ws/2/release/?query=${q}&limit=6&fmt=json`;
+    const resp = await fetch(url, { headers: { 'User-Agent': CONFIG.MB_USER_AGENT } });
+    const data = await resp.json();
+    return (data.releases || []).filter(r => r.id).map(r => ({
+      url:   `https://coverartarchive.org/release/${r.id}/front-250`,
+      label: r.title + (r.date ? ' (' + r.date.slice(0,4) + ')' : '') + ' [MB]',
+      mbid:  r.id,
+    }));
+  } catch { return []; }
+}
+
+// MusicBrainz: artist releases
+async function fetchMBArtistCandidates(artistName) {
+  try {
+    const q = encodeURIComponent(`artist:"${artistName}"`);
+    const url = `https://musicbrainz.org/ws/2/release/?query=${q}&limit=6&fmt=json`;
+    const resp = await fetch(url, { headers: { 'User-Agent': CONFIG.MB_USER_AGENT } });
+    const data = await resp.json();
+    return (data.releases || []).filter(r => r.id).map(r => ({
+      url:   `https://coverartarchive.org/release/${r.id}/front-250`,
+      label: r.title + (r.date ? ' (' + r.date.slice(0,4) + ')' : '') + ' [MB]',
+      mbid:  r.id,
+    }));
+  } catch { return []; }
+}
+
+// iTunes Search API — returns up to 3 artwork URLs
+async function fetchItunesCandidates(artist, album) {
+  try {
+    const term = encodeURIComponent(artist ? `${artist} ${album}` : album);
+    const url  = `https://itunes.apple.com/search?term=${term}&media=music&entity=album&limit=6`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    return (data.results || []).map(r => ({
+      url:   r.artworkUrl100.replace('100x100bb', '600x600bb'),
+      label: `${r.collectionName} — ${r.artistName} [iTunes]`,
+    }));
+  } catch { return []; }
+}
+
+// Wikipedia/Wikimedia — search infobox image via Wikipedia REST API
+async function fetchWikiCandidates(artist, album) {
+  try {
+    const query = encodeURIComponent(artist ? `${album} ${artist} album` : album);
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&srlimit=3&format=json&origin=*`;
+    const searchResp = await fetch(searchUrl);
+    const searchData = await searchResp.json();
+    const pages = (searchData.query?.search || []);
+    const candidates = [];
+    for (const page of pages.slice(0, 2)) {
+      await sleep(120);
+      const imgUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(page.title)}&prop=pageimages&pithumbsize=600&format=json&origin=*`;
+      const imgResp = await fetch(imgUrl);
+      const imgData = await imgResp.json();
+      const pageObj = Object.values(imgData.query?.pages || {})[0];
+      if (pageObj?.thumbnail?.source) {
+        candidates.push({
+          url:   pageObj.thumbnail.source,
+          label: page.title + ' [Wikipedia]',
+        });
+      }
+    }
+    return candidates;
+  } catch { return []; }
+}
+
+// Scan a Drive folder (and album sub-folders for artists) for image files,
+// download them and return ready-to-use {label, data} candidates.
+async function fetchDriveFolderArtCandidates(item, type) {
+  const candidates = [];
+  try {
+    // Collect folder IDs to scan
+    const folderIds = [];
+    if (type === 'album') {
+      folderIds.push(item.id);
+    } else {
+      // Artist: scan artist folder + up to 5 album sub-folders
+      folderIds.push(item.id);
+      if (item.albums) {
+        item.albums.slice(0, 5).forEach(a => folderIds.push(a.id));
+      }
+    }
+
+    const seen = new Set();
+    for (const folderId of folderIds) {
+      let files;
+      try {
+        files = await listFiles(folderId);
+      } catch(e) { continue; }
+
+      const imgs = files.filter(f => isImageFile(f.name) && !seen.has(f.id));
+      for (const imgFile of imgs.slice(0, 4)) {
+        seen.add(imgFile.id);
+        const data = await fetchDriveImageAsBase64(imgFile.id);
+        if (data) {
+          candidates.push({ label: `${imgFile.name} [Drive Folder]`, data });
+        }
+      }
+      if (candidates.length >= 6) break;
+    }
+  } catch(e) { /* silent */ }
+  return candidates;
+}
+
+async function searchArtworkCandidates() {
+  const statusEl  = document.getElementById('art-fix-status');
+  const statusTxt = document.getElementById('art-fix-status-text');
+  const resultsEl = document.getElementById('art-fix-results');
+  const saveBtn   = document.getElementById('art-fix-save-btn');
+
+  statusEl.classList.add('loading');
+  statusTxt.textContent = 'Searching…';
+  resultsEl.innerHTML = '';
+  saveBtn.disabled = true;
+  ArtFix.results = [];
+  ArtFix.selectedIdx = -1;
+
+  const item       = ArtFix.item;
+  const type       = ArtFix.type;
+  const artistName = item.artist || item.artistName || '';
+  const itemName   = item.name;
+
+  try {
+    // ── Step 1: Check Drive folder first (fastest, most accurate) ──
+    statusTxt.textContent = 'Checking Drive folder for images…';
+    const driveCandidates = await fetchDriveFolderArtCandidates(item, type);
+
+    // Show Drive results immediately while online search runs
+    if (driveCandidates.length) {
+      ArtFix.results = [...driveCandidates];
+      statusTxt.textContent = `Found ${driveCandidates.length} image(s) in Drive folder — searching online too…`;
+      renderArtworkCandidates();
+    }
+
+    // ── Step 2: Gather online URL candidates ──
+    statusTxt.textContent = driveCandidates.length
+      ? `${driveCandidates.length} from Drive — also checking MusicBrainz…`
+      : 'Searching MusicBrainz…';
+
+    const mbCandidates = type === 'album'
+      ? await fetchMBAlbumCandidates(artistName, itemName)
+      : await fetchMBArtistCandidates(itemName);
+
+    statusTxt.textContent = 'Searching iTunes…';
+    await sleep(100);
+    const itunesCandidates = await fetchItunesCandidates(artistName, itemName);
+
+    statusTxt.textContent = 'Searching Wikipedia…';
+    await sleep(100);
+    const wikiCandidates = await fetchWikiCandidates(artistName, itemName);
+
+    // Fallback: MB without artist name
+    let onlineCandidates = [...mbCandidates, ...itunesCandidates, ...wikiCandidates];
+    if (!onlineCandidates.length && type === 'album') {
+      onlineCandidates = await fetchMBAlbumCandidates('', itemName);
+    }
+
+    // ── Step 3: Download online images (fill up to 8 total slots) ──
+    const remainingSlots = Math.max(0, 8 - ArtFix.results.length);
+    const fetched = [...ArtFix.results]; // start with Drive results already fetched
+    if (onlineCandidates.length && remainingSlots > 0) {
+      statusTxt.textContent = `Loading online previews…`;
+      for (const c of onlineCandidates.slice(0, remainingSlots + 4)) {
+        if (fetched.length >= 10) break;
+        const data = await fetchImageAsBase64(c.url);
+        if (data) fetched.push({ ...c, data });
+        await sleep(120);
+        statusTxt.textContent = `Loading previews… ${fetched.length} found`;
+      }
+    }
+
+    ArtFix.results = fetched;
+    statusEl.classList.remove('loading');
+
+    if (!fetched.length) {
+      statusTxt.textContent = 'No artwork found in Drive folder, MusicBrainz, iTunes or Wikipedia.';
+      return;
+    }
+
+    statusTxt.textContent = `${fetched.length} artwork option${fetched.length !== 1 ? 's' : ''} — tap one to select`;
+    renderArtworkCandidates();
+  } catch(e) {
+    statusEl.classList.remove('loading');
+    statusTxt.textContent = 'Search failed: ' + e.message;
+  }
+}
+
+function renderArtworkCandidates() {
+  const resultsEl = document.getElementById('art-fix-results');
+  const saveBtn   = document.getElementById('art-fix-save-btn');
+  resultsEl.innerHTML = '';
+  ArtFix.results.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'art-result-card' + (i === ArtFix.selectedIdx ? ' selected' : '');
+    card.innerHTML = `<img src="${r.data}" alt="art"/><div class="arc-label">${esc(r.label)}</div>`;
+    card.addEventListener('click', () => {
+      ArtFix.selectedIdx = i;
+      resultsEl.querySelectorAll('.art-result-card').forEach((c, ci) => {
+        c.classList.toggle('selected', ci === i);
+      });
+      saveBtn.disabled = false;
+      // Preview in thumb
+      document.getElementById('art-fix-thumb').innerHTML = `<img src="${r.data}" alt="art"/>`;
+    });
+    resultsEl.appendChild(card);
+  });
+}
+
+async function applySelectedArtwork() {
+  if (ArtFix.selectedIdx < 0 || !ArtFix.results[ArtFix.selectedIdx]) return;
+  const chosen = ArtFix.results[ArtFix.selectedIdx];
+  const statusEl  = document.getElementById('art-fix-status');
+  const statusTxt = document.getElementById('art-fix-status-text');
+  const saveBtn   = document.getElementById('art-fix-save-btn');
+
+  statusEl.classList.add('loading');
+  statusTxt.textContent = 'Saving artwork…';
+  saveBtn.disabled = true;
+
+  try {
+    // Save to DB
+    await dbSet('artwork', ArtFix.artKey, chosen.data);
+
+    // If this is an album, also update artist art if missing
+    if (ArtFix.type === 'album') {
+      const artistKey = `artist_${ArtFix.item.artistId}`;
+      const existing = await dbGet('artwork', artistKey);
+      if (!existing) await dbSet('artwork', artistKey, chosen.data);
+    }
+
+    statusEl.classList.remove('loading');
+    statusTxt.textContent = 'Artwork saved ✓';
+
+    // Refresh any visible art elements in the current browse view
+    refreshVisibleArt(ArtFix.artKey, chosen.data);
+
+    setTimeout(() => {
+      document.getElementById('artwork-fix-modal').classList.remove('active');
+      showToast('Artwork updated ✓');
+      // Re-render current browse view to show updated art
+      if (document.getElementById('browse-screen').classList.contains('active')) {
+        renderBrowse();
+      } else if (document.getElementById('library-screen').classList.contains('active')) {
+        renderLibraryTab(State.currentTab);
+      }
+    }, 800);
+  } catch(e) {
+    statusEl.classList.remove('loading');
+    statusTxt.textContent = 'Save failed: ' + e.message;
+    saveBtn.disabled = false;
+  }
+}
+
+function refreshVisibleArt(artKey, data) {
+  // Update all DOM elements currently showing this artKey
+  document.querySelectorAll('[data-art-key]').forEach(el => {
+    if (el.dataset.artKey === artKey) {
+      el.innerHTML = `<img src="${data}" alt="art"/>`;
+    }
+  });
+  // Also update player if currently playing
+  if (State.currentSong && State.currentSong.artKey === artKey) {
+    const artEl = document.getElementById('player-art');
+    const bgEl  = document.getElementById('player-bg');
+    artEl.innerHTML = `<img src="${data}" alt="art"/>`;
+    bgEl.style.backgroundImage = `url(${data})`;
+  }
+}
+
+
+
+// ════════════════════════════════════════════════════════════════
+//  AUDIO ENGINE
+// ════════════════════════════════════════════════════════════════
+const Audio = new window.Audio();
+Audio.preload = 'auto';
+
+// MediaSession API for lock screen / notification controls
+function setupMediaSession(song, artSrc) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: song.name,
+    artist: song.artist,
+    album: song.album,
+    artwork: artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/jpeg' }] : [],
+  });
+  navigator.mediaSession.setActionHandler('play', () => playPause());
+  navigator.mediaSession.setActionHandler('pause', () => playPause());
+  navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+  navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+  navigator.mediaSession.setActionHandler('seekto', e => { if (e.seekTime != null) Audio.currentTime = e.seekTime; });
+}
+
+Audio.addEventListener('ended', () => {
+  if (State.repeatMode === 2) {
+    Audio.currentTime = 0;
+    Audio.play().catch(() => {});
+  } else {
+    nextTrack();
+  }
+});
+
+Audio.addEventListener('timeupdate', updateProgress);
+Audio.addEventListener('loadedmetadata', () => {
+  document.getElementById('time-total').textContent = formatTime(Audio.duration);
+});
+Audio.addEventListener('waiting', () => document.getElementById('player-loading').classList.add('show'));
+Audio.addEventListener('canplay', () => document.getElementById('player-loading').classList.remove('show'));
+Audio.addEventListener('error', (e) => {
+  // Only auto-skip if we have a real src set and it's not a voluntary src-clear
+  if (Audio.src && Audio.src !== window.location.href && State.currentSong) {
+    showToast('Playback error — skipping track');
+    setTimeout(nextTrack, 1000);
+  }
+});
+
+function updateProgress() {
+  if (!Audio.duration) return;
+  const pct = (Audio.currentTime / Audio.duration) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-thumb').style.left = pct + '%';
+  document.getElementById('time-current').textContent = formatTime(Audio.currentTime);
+  if ('mediaSession' in navigator && Audio.duration) {
+    navigator.mediaSession.setPositionState({
+      duration: Audio.duration,
+      playbackRate: Audio.playbackRate,
+      position: Audio.currentTime,
+    });
+  }
+}
+
+function formatTime(s) {
+  if (!s || isNaN(s)) return '0:00';
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PRELOADER — downloads next song blob in background
+// ════════════════════════════════════════════════════════════════
+const Preloader = {
+  cache: {},          // songId → blob URL
+  fetching: new Set(),
+  MAX: 4,
+
+  async prime(song) {
+    if (!song) return;
+    if (this.cache[song.id] || this.fetching.has(song.id)) return;
+    this.fetching.add(song.id);
+    try {
+      const url = await getPlayableUrl(song.id);
+      this.cache[song.id] = url;
+      this._evict();
+    } catch(e) { /* silent fallback */ }
+    finally { this.fetching.delete(song.id); }
+  },
+
+  consume(songId) {
+    const url = this.cache[songId];
+    delete this.cache[songId];
+    return url || null;
+  },
+
+  _evict() {
+    const keys = Object.keys(this.cache);
+    if (keys.length > this.MAX) {
+      keys.slice(0, keys.length - this.MAX).forEach(k => {
+        URL.revokeObjectURL(this.cache[k]);
+        delete this.cache[k];
+      });
+    }
+  },
+
+  clear() {
+    Object.values(this.cache).forEach(u => URL.revokeObjectURL(u));
+    this.cache = {};
+    this.fetching.clear();
+  }
+};
+
+// Determine which song comes next (respects shuffle) and preload it.
+// Called immediately when a song starts playing and again near the end.
+function primeNextSong() {
+  if (!State.queue.length) return;
+
+  if (State.isShuffleOn) {
+    // Peek at what smart shuffle would pick — same logic as playSmartShuffleNext
+    // but without actually advancing state.
+    const queue = State.queue;
+    const played = new Set(State.playedIds);
+    if (State.currentSong) played.add(State.currentSong.id);
+    let unplayed = queue.filter(s => !played.has(s.id));
+    if (unplayed.length === 0) {
+      // All played — wrap: any song except current
+      unplayed = queue.filter(s => !State.currentSong || s.id !== State.currentSong.id);
+    }
+    if (unplayed.length === 0) return;
+    // Preload all remaining unplayed (up to MAX) so whichever random pick happens,
+    // there's a high chance it's already cached.
+    const toPrime = unplayed.slice(0, Preloader.MAX);
+    toPrime.forEach(s => Preloader.prime(s));
+  } else {
+    // Sequential — preload next 2 songs in queue
+    const n1 = (State.queueIndex + 1) % State.queue.length;
+    const n2 = (State.queueIndex + 2) % State.queue.length;
+    Preloader.prime(State.queue[n1]);
+    if (n2 !== n1) Preloader.prime(State.queue[n2]);
+  }
+}
+
+// Kick off preloading right when a song starts, and again near the end
+Audio.addEventListener('playing', () => primeNextSong());
+Audio.addEventListener('timeupdate', () => {
+  if (Audio.duration && (Audio.duration - Audio.currentTime) < 45) primeNextSong();
+});
+
+// ════════════════════════════════════════════════════════════════
+//  PLAYBACK CONTROL
+// ════════════════════════════════════════════════════════════════
+async function playSong(song, queue = null, idx = 0) {
+  if (queue) {
+    Preloader.clear();
+    State.queue = queue;
+    State.queueIndex = idx;
+  }
+  State.currentSong = song;
+
+  updatePlayerUI(song);
+  // Don't switch screens while clean-names is running
+  if (!State.cleanRunning) showScreen('player-screen');
+  renderQueueStrip();
+
+  if (Audio._blobUrl) {
+    URL.revokeObjectURL(Audio._blobUrl);
+    Audio._blobUrl = null;
+  }
+
+  // Use preloaded blob if available — instant playback
+  const cached = Preloader.consume(song.id);
+  if (cached) {
+    Audio._blobUrl = cached;
+    Audio.src = cached;
+    try {
+      await Audio.play();
+      State.isPlaying = true;
+      document.getElementById('play-icon').style.display = 'none';
+      document.getElementById('pause-icon').style.display = 'block';
+    } catch(e) { console.error(e); }
+    // Start preloading the next song right away
+    setTimeout(primeNextSong, 500);
+    return;
+  }
+
+  // Not preloaded — fetch on demand, then immediately prime next
+  document.getElementById('player-loading').classList.add('show');
+  try {
+    const blobUrl = await getPlayableUrl(song.id);
+    Audio._blobUrl = blobUrl;
+    Audio.src = blobUrl;
+    await Audio.play();
+    State.isPlaying = true;
+    document.getElementById('play-icon').style.display = 'none';
+    document.getElementById('pause-icon').style.display = 'block';
+    // Start preloading the next song immediately after this one starts
+    setTimeout(primeNextSong, 500);
+  } catch(e) {
+    showToast('Could not load track — check connection');
+    console.error(e);
+    // Try next track automatically on load failure
+    setTimeout(() => nextTrack(), 1500);
+  } finally {
+    document.getElementById('player-loading').classList.remove('show');
+  }
+}
+
+async function updatePlayerUI(song) {
+  document.getElementById('player-track-name').textContent = song.name;
+  document.getElementById('player-artist-name').textContent = [song.artist, song.album].filter(Boolean).join(' · ');
+  document.getElementById('player-context-name').textContent = song.album || song.artist;
+
+  // Art
+  const artEl = document.getElementById('player-art');
+  const bgEl = document.getElementById('player-bg');
+  artEl.classList.add('transitioning');
+
+  const artData = await dbGet('artwork', song.artKey);
+  setTimeout(() => {
+    if (artData) {
+      artEl.innerHTML = `<img src="${artData}" alt="art"/>`;
+      bgEl.style.backgroundImage = `url(${artData})`;
+    } else {
+      artEl.innerHTML = '🎵';
+      bgEl.style.backgroundImage = 'none';
+    }
+    artEl.classList.remove('transitioning');
+  }, 200);
+
+  // Fav button
+  const favBtn = document.getElementById('player-fav-btn');
+  favBtn.classList.toggle('active', State.favorites.has(song.id));
+  favBtn.innerHTML = State.favorites.has(song.id)
+    ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="#e05555" stroke="#e05555" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+    : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+  // Play/pause icons
+  document.getElementById('play-icon').style.display = 'none';
+  document.getElementById('pause-icon').style.display = 'block';
+
+  // MediaSession
+  setupMediaSession(song, artData);
+
+  // Update mini player banner (in case it's visible)
+  updateMiniPlayer(song);
+
+  // Update visualizer track info (if open)
+  if (Viz.active) vizUpdateTrackInfo();
+}
+
+function playPause() {
+  if (!State.currentSong) return;
+  if (Audio.paused) {
+    Audio.play();
+    State.isPlaying = true;
+    document.getElementById('play-icon').style.display = 'none';
+    document.getElementById('pause-icon').style.display = 'block';
+  } else {
+    Audio.pause();
+    State.isPlaying = false;
+    document.getElementById('play-icon').style.display = 'block';
+    document.getElementById('pause-icon').style.display = 'none';
+  }
+}
+
+function prevTrack() {
+  if (Audio.currentTime > 3) { Audio.currentTime = 0; return; }
+  if (State.queue.length === 0) return;
+
+  if (State.isShuffleOn && State.shuffleHistory.length > 1) {
+    // Pop current, go back to previous in shuffle history
+    State.shuffleHistory.pop();
+    const prevId = State.shuffleHistory[State.shuffleHistory.length - 1];
+    const idx = State.queue.findIndex(s => s.id === prevId);
+    if (idx !== -1) {
+      State.queueIndex = idx;
+      // Un-mark as played so it re-enters the pool naturally
+      State.playedIds.delete(prevId);
+      playSong(State.queue[idx]);
+      return;
+    }
+  }
+
+  // Normal mode or no shuffle history
+  State.queueIndex = (State.queueIndex - 1 + State.queue.length) % State.queue.length;
+  playSong(State.queue[State.queueIndex]);
+}
+
+function nextTrack() {
+  if (State.queue.length === 0) return;
+  if (State.repeatMode === 2) { playSong(State.queue[State.queueIndex]); return; }
+
+  if (State.isShuffleOn) {
+    playSmartShuffleNext();
+    return;
+  }
+
+  State.queueIndex = (State.queueIndex + 1) % State.queue.length;
+  playSong(State.queue[State.queueIndex]);
+}
+
+function playSmartShuffleNext() {
+  const queue = State.queue;
+  if (!queue.length) return;
+
+  // Mark current song as played
+  if (State.currentSong) State.playedIds.add(State.currentSong.id);
+
+  // Build pool of unplayed songs
+  let unplayed = queue.filter(s => !State.playedIds.has(s.id));
+
+  // All songs played — reset cycle, persist cleared state
+  if (unplayed.length === 0) {
+    State.playedIds.clear();
+    if (State.currentSong) State.playedIds.add(State.currentSong.id);
+    unplayed = queue.filter(s => !State.playedIds.has(s.id));
+    savePlayedIds();
+    showToast('Starting new shuffle cycle ↺');
+  }
+
+  // Pick using crypto randomness — never the same predictable sequence
+  const next = unplayed[cryptoRandInt(unplayed.length)];
+  State.queueIndex = queue.findIndex(s => s.id === next.id);
+  State.shuffleHistory.push(next.id);
+  if (State.shuffleHistory.length > 50) State.shuffleHistory.shift();
+
+  // Persist played set so restarts don't repeat already-heard songs
+  savePlayedIds();
+
+  playSong(next);
+}
+
+function savePlayedIds() {
+  if (State.db) dbSet('meta', 'playedIds', [...State.playedIds]).catch(() => {});
+}
+
+// Crypto-quality Fisher-Yates — better randomness than Math.random
+function shuffleArray(arr) {
+  const a = [...arr];
+  const buf = new Uint32Array(1);
+  for (let i = a.length - 1; i > 0; i--) {
+    crypto.getRandomValues(buf);
+    const j = buf[0] % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Crypto random integer in [0, max)
+function cryptoRandInt(max) {
+  if (max <= 0) return 0;
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return buf[0] % max;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PROGRESS BAR SEEK
+// ════════════════════════════════════════════════════════════════
+(function setupSeek() {
+  const bar = document.getElementById('progress-bar');
+  let dragging = false;
+  function seek(e) {
+    const rect = bar.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const pct = Math.max(0, Math.min(1, x / rect.width));
+    if (Audio.duration) Audio.currentTime = pct * Audio.duration;
+  }
+  bar.addEventListener('mousedown', e => { dragging = true; bar.classList.add('dragging'); seek(e); });
+  bar.addEventListener('touchstart', e => { dragging = true; bar.classList.add('dragging'); seek(e); }, { passive: true });
+  document.addEventListener('mousemove', e => { if (dragging) seek(e); });
+  document.addEventListener('touchmove', e => { if (dragging) seek(e); }, { passive: true });
+  document.addEventListener('mouseup', () => { dragging = false; bar.classList.remove('dragging'); });
+  document.addEventListener('touchend', () => { dragging = false; bar.classList.remove('dragging'); });
+})();
+
+// ════════════════════════════════════════════════════════════════
+//  LIBRARY UI
+// ════════════════════════════════════════════════════════════════
+function showLibrary() {
+  showScreen('library-screen');
+  renderLibraryTab(State.currentTab);
+  updateFavBadge();
+  // Always push sentinel so the back button is caught at library level
+  pushBackSentinel();
+}
+
+function renderLibraryTab(tab) {
+  State.currentTab = tab;
+  document.querySelectorAll('.lib-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const list = document.getElementById('lib-list');
+  const query = document.getElementById('lib-search-input').value.toLowerCase();
+
+  if (!State.library) { list.innerHTML = '<div class="empty-state"><p>Library not loaded.</p></div>'; return; }
+
+  if (tab === 'artists') {
+    let artists = [...State.library.artists];
+    if (query) artists = artists.filter(a => a.name.toLowerCase().includes(query));
+    if (!artists.length) { list.innerHTML = '<div class="empty-state"><p>No artists found.</p></div>'; return; }
+
+    let html = '';
+    let lastLetter = '';
+    for (const artist of artists) {
+      const letter = (artist.name[0] || '#').toUpperCase();
+      if (letter !== lastLetter) {
+        html += `<div class="lib-section-letter">${letter}</div>`;
+        lastLetter = letter;
+      }
+      const albumCount = artist.albums.length;
+      const songCount = artist.songs.length + artist.albums.reduce((s, a) => s + a.songs.length, 0);
+      html += `<div class="lib-item" data-artist-id="${artist.id}">
+        <div class="lib-item-art" id="art-artist-${artist.id}">🎤</div>
+        <div class="lib-item-info">
+          <div class="lib-item-name">${esc(artist.name)}</div>
+          <div class="lib-item-sub">${albumCount} album${albumCount !== 1 ? 's' : ''} · ${songCount} song${songCount !== 1 ? 's' : ''}</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>`;
+    }
+    list.innerHTML = html;
+    // Load art async
+    for (const artist of artists) loadArtIntoEl(`art-artist-${artist.id}`, `artist_${artist.id}`);
+    list.querySelectorAll('.lib-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const artist = State.library.artists.find(a => a.id === el.dataset.artistId);
+        if (artist) openArtist(artist);
+      });
+    });
+
+  } else if (tab === 'albums') {
+    const allAlbums = [];
+    for (const artist of State.library.artists) {
+      for (const album of artist.albums) allAlbums.push({ ...album, artistName: artist.name });
+    }
+    let filtered = allAlbums.sort((a, b) => a.name.localeCompare(b.name));
+    if (query) filtered = filtered.filter(a => a.name.toLowerCase().includes(query) || a.artistName.toLowerCase().includes(query));
+    if (!filtered.length) { list.innerHTML = '<div class="empty-state"><p>No albums found.</p></div>'; return; }
+    let html = '';
+    for (const album of filtered) {
+      html += `<div class="lib-item" data-album-id="${album.id}">
+        <div class="lib-item-art" id="art-album-${album.id}">💿</div>
+        <div class="lib-item-info">
+          <div class="lib-item-name">${esc(album.name)}</div>
+          <div class="lib-item-sub">${esc(album.artistName)}</div>
+          <div class="lib-item-meta">${album.songs.length} track${album.songs.length !== 1 ? 's' : ''}</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>`;
+    }
+    list.innerHTML = html;
+    for (const album of filtered) loadArtIntoEl(`art-album-${album.id}`, `album_${album.id}`);
+    list.querySelectorAll('.lib-item').forEach(el => {
+      attachLongPress(el, () => {
+        const album = allAlbums.find(a => a.id === el.dataset.albumId);
+        if (album) openItemContextMenu('album', album);
+      });
+      el.addEventListener('click', () => {
+        const album = allAlbums.find(a => a.id === el.dataset.albumId);
+        if (album) {
+          const artist = State.library.artists.find(a => a.id === album.artistId);
+          openAlbum(album, artist);
+        }
+      });
+    });
+
+  } else if (tab === 'songs') {
+    let songs = [...State.library.allSongs].sort((a, b) => a.name.localeCompare(b.name));
+    if (query) songs = songs.filter(s => s.name.toLowerCase().includes(query) || s.artist.toLowerCase().includes(query));
+    if (!songs.length) { list.innerHTML = '<div class="empty-state"><p>No songs found.</p></div>'; return; }
+    let html = '';
+    for (let i = 0; i < songs.length; i++) {
+      const s = songs[i];
+      const isFav = State.favorites.has(s.id);
+      html += `<div class="lib-item" data-song-idx="${i}">
+        <div class="lib-item-art" id="art-song-${i}">🎵</div>
+        <div class="lib-item-info">
+          <div class="lib-item-name">${esc(s.name)}</div>
+          <div class="lib-item-sub">${esc(s.artist)}${s.album ? ' · ' + esc(s.album) : ''}</div>
+        </div>
+        <div class="browse-item-fav ${isFav ? 'active' : ''}" data-song-id="${s.id}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? '#e05555' : 'none'}" stroke="${isFav ? '#e05555' : 'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+      </div>`;
+    }
+    list.innerHTML = html;
+    for (let i = 0; i < songs.length; i++) loadArtIntoEl(`art-song-${i}`, songs[i].artKey);
+    list.querySelectorAll('.lib-item').forEach(el => {
+      const idx = parseInt(el.dataset.songIdx);
+      attachLongPress(el, () => {
+        if (DeleteState.selecting) {
+          el.classList.toggle('delete-selected', DeleteState.selected.has(songs[idx].id));
+          toggleDeleteSelect(songs[idx].id, el);
+        } else {
+          // Enter multi-select mode, select this song
+          enterDeleteSelect();
+          toggleDeleteSelect(songs[idx].id, el);
+        }
+      });
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('.browse-item-fav')) return;
+        if (DeleteState.selecting) {
+          toggleDeleteSelect(songs[idx].id, el);
+          return;
+        }
+        playSong(songs[idx], songs, idx);
+      });
+    });
+    list.querySelectorAll('.browse-item-fav').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFavorite(el.dataset.songId);
+        renderLibraryTab(tab);
+      });
+    });
+
+  } else if (tab === 'favorites') {
+    const favSongs = State.library.allSongs.filter(s => State.favorites.has(s.id));
+    if (!favSongs.length) {
+      list.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><p>No favorites yet.<br/>Tap the heart on any song to save it here.</p></div>';
+      return;
+    }
+    let html = '';
+    for (let i = 0; i < favSongs.length; i++) {
+      const s = favSongs[i];
+      html += `<div class="lib-item" data-fav-idx="${i}">
+        <div class="lib-item-art" id="art-fav-${i}">🎵</div>
+        <div class="lib-item-info">
+          <div class="lib-item-name">${esc(s.name)}</div>
+          <div class="lib-item-sub">${esc(s.artist)}${s.album ? ' · ' + esc(s.album) : ''}</div>
+        </div>
+        <div class="browse-item-fav active" data-song-id="${s.id}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#e05555" stroke="#e05555" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+      </div>`;
+    }
+    list.innerHTML = html;
+    for (let i = 0; i < favSongs.length; i++) loadArtIntoEl(`art-fav-${i}`, favSongs[i].artKey);
+    list.querySelectorAll('.lib-item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('.browse-item-fav')) return;
+        const idx = parseInt(el.dataset.favIdx);
+        playSong(favSongs[idx], favSongs, idx);
+      });
+    });
+    list.querySelectorAll('.browse-item-fav').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFavorite(el.dataset.songId);
+        renderLibraryTab(tab);
+      });
+    });
+  }
+}
+
+async function loadArtIntoEl(elId, artKey) {
+  if (!artKey) return;
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const art = await dbGet('artwork', artKey);
+  if (art && el) {
+    el.innerHTML = `<img src="${art}" alt="art"/>`;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  BROWSE (Artist → Album → Songs)
+// ════════════════════════════════════════════════════════════════
+function openArtist(artist) {
+  State.browseStack = [{ type: 'artist', data: artist }];
+  renderBrowse();
+  showScreen('browse-screen');
+}
+
+function openAlbum(album, artist) {
+  State.browseStack = [{ type: 'artist', data: artist }, { type: 'album', data: album }];
+  renderBrowse();
+  showScreen('browse-screen');
+}
+
+async function renderBrowse() {
+  const top = State.browseStack[State.browseStack.length - 1];
+  const titleEl = document.getElementById('browse-title');
+  const subtitleEl = document.getElementById('browse-subtitle');
+  const heroNameEl = document.getElementById('browse-hero-name');
+  const heroSubEl = document.getElementById('browse-hero-sub');
+  const heroArtEl = document.getElementById('browse-hero-art');
+  const listEl = document.getElementById('browse-list');
+
+  if (top.type === 'artist') {
+    const artist = top.data;
+    titleEl.textContent = artist.name;
+    subtitleEl.textContent = `${artist.albums.length} album${artist.albums.length !== 1 ? 's' : ''}`;
+    heroNameEl.textContent = artist.name;
+    heroSubEl.textContent = `${artist.albums.reduce((s, a) => s + a.songs.length, 0) + artist.songs.length} songs`;
+    heroArtEl.innerHTML = '🎤';
+    const art = await dbGet('artwork', `artist_${artist.id}`);
+    if (art) heroArtEl.innerHTML = `<img src="${art}" alt="art"/>`;
+    heroArtEl.title = 'Long press for options';
+    heroArtEl.oncontextmenu = e => { e.preventDefault(); openItemContextMenu('artist', artist); };
+    attachLongPress(heroArtEl, () => openItemContextMenu('artist', artist));
+
+    // Collect all songs for Play All / Shuffle
+    const allSongs = [...artist.songs, ...artist.albums.flatMap(a => a.songs)];
+    setupBrowseActions(allSongs, artist.name);
+
+    let html = '';
+    // Direct songs
+    if (artist.songs.length > 0) {
+      html += '<div class="lib-section-letter">Songs</div>';
+      artist.songs.forEach((s, i) => { html += buildSongRow(s, i, `artist_${artist.id}`); });
+    }
+    // Albums
+    if (artist.albums.length > 0) {
+      html += '<div class="lib-section-letter">Albums</div>';
+      for (const album of artist.albums) {
+        html += `<div class="browse-item" data-album-id="${album.id}" style="padding:14px 20px; position:relative;">
+          <div class="browse-item-art" id="brs-alb-${album.id}" data-art-key="album_${album.id}">💿</div>
+          <div class="browse-item-info">
+            <div class="browse-item-name">${esc(album.name)}</div>
+            <div class="browse-item-sub">${album.songs.length} track${album.songs.length !== 1 ? 's' : ''}</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>`;
+      }
+    }
+    listEl.innerHTML = html;
+    for (const album of artist.albums) {
+      loadArtIntoEl(`brs-alb-${album.id}`, `album_${album.id}`);
+      // Add missing-art indicator asynchronously
+      markMissingArt(`brs-alb-${album.id}`, `album_${album.id}`);
+    }
+
+    listEl.querySelectorAll('[data-album-id]').forEach(el => {
+      attachLongPress(el, () => {
+        const album = artist.albums.find(a => a.id === el.dataset.albumId);
+        if (album) openItemContextMenu('album', album);
+      });
+      el.addEventListener('click', () => {
+        const album = artist.albums.find(a => a.id === el.dataset.albumId);
+        if (album) {
+          State.browseStack.push({ type: 'album', data: album });
+          renderBrowse();
+        }
+      });
+    });
+    attachSongRowListeners(listEl, artist.songs, `artist_${artist.id}`);
+
+  } else if (top.type === 'album') {
+    const album = top.data;
+    titleEl.textContent = album.name;
+    subtitleEl.textContent = album.artistName || album.artist;
+    heroNameEl.textContent = album.name;
+    heroSubEl.textContent = `${album.songs.length} tracks`;
+    heroArtEl.innerHTML = '💿';
+    const art = await dbGet('artwork', `album_${album.id}`);
+    if (art) heroArtEl.innerHTML = `<img src="${art}" alt="art"/>`;
+    heroArtEl.title = 'Long press for options';
+    heroArtEl.oncontextmenu = e => { e.preventDefault(); openItemContextMenu('album', album); };
+    attachLongPress(heroArtEl, () => openItemContextMenu('album', album));
+
+    setupBrowseActions(album.songs, album.name);
+
+    let html = '';
+    album.songs.forEach((s, i) => { html += buildSongRow(s, i, `album_${album.id}`, true); });
+    listEl.innerHTML = html;
+    attachSongRowListeners(listEl, album.songs, `album_${album.id}`);
+  }
+}
+
+function buildSongRow(song, idx, artKey, showNum = false) {
+  const isFav = State.favorites.has(song.id);
+  return `<div class="browse-item" data-song-idx="${idx}" data-art-key="${artKey}">
+    ${showNum ? `<div class="browse-item-num">${idx + 1}</div>` : ''}
+    <div class="browse-item-info" style="margin-left:${showNum?'0':'8px'}">
+      <div class="browse-item-name">${esc(song.name)}</div>
+      ${!showNum ? `<div class="browse-item-sub">${esc(song.artist)}</div>` : ''}
+    </div>
+    <div class="browse-item-fav ${isFav ? 'active' : ''}" data-song-id="${song.id}" style="color:${isFav?'#e05555':'var(--text3)'}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav?'#e05555':'none'}" stroke="${isFav?'#e05555':'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </div>
+  </div>`;
+}
+
+function attachSongRowListeners(container, songs, artKey) {
+  container.querySelectorAll('[data-song-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.songIdx);
+    attachLongPress(el, () => {
+      // Long press: if already in select mode just toggle; else open context menu
+      if (DeleteState.selecting) {
+        toggleDeleteSelect(songs[idx].id, el);
+      } else {
+        openItemContextMenu('song', songs[idx]);
+      }
+    });
+    el.addEventListener('click', e => {
+      if (e.target.closest('.browse-item-fav')) return;
+      if (DeleteState.selecting) {
+        // In select mode: tap toggles selection
+        toggleDeleteSelect(songs[idx].id, el);
+        return;
+      }
+      playSong(songs[idx], songs, idx);
+    });
+  });
+  container.querySelectorAll('.browse-item-fav').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFavorite(el.dataset.songId);
+      renderBrowse();
+    });
+  });
+}
+
+function setupBrowseActions(songs, contextName) {
+  document.getElementById('browse-play-btn').onclick = () => {
+    if (songs.length) playSong(songs[0], songs, 0);
+  };
+  document.getElementById('browse-shuffle-btn').onclick = () => {
+    if (songs.length) {
+      State.isShuffleOn = true;
+      State.playedIds = new Set();
+      State.shuffleHistory = [];
+      savePlayedIds();
+      const bFirstIdx = cryptoRandInt(songs.length);
+      const bFirstSong = songs[bFirstIdx];
+      State.playedIds.add(bFirstSong.id);
+      State.shuffleHistory.push(bFirstSong.id);
+      playSong(bFirstSong, songs, bFirstIdx);
+    }
+  };
+  document.getElementById('shuffle-folder-name').textContent = contextName;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  FAVORITES
+// ════════════════════════════════════════════════════════════════
+function toggleFavorite(songId) {
+  if (State.favorites.has(songId)) {
+    State.favorites.delete(songId);
+    showToast('Removed from favorites');
+  } else {
+    State.favorites.add(songId);
+    showToast('Added to favorites ♥');
+  }
+  saveFavorites();
+  updateFavBadge();
+  if (State.currentSong && State.currentSong.id === songId) {
+    updatePlayerUI(State.currentSong);
+  }
+}
+
+function saveFavorites() {
+  dbSet('meta', 'favorites', [...State.favorites]);
+}
+
+function updateFavBadge() {
+  const badge = document.getElementById('fav-count-badge');
+  const count = State.favorites.size;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  QUEUE STRIP
+// ════════════════════════════════════════════════════════════════
+function renderQueueStrip() {
+  const strip = document.getElementById('queue-strip');
+  if (!State.queue.length) { strip.innerHTML = ''; return; }
+  const start = Math.max(0, State.queueIndex - 2);
+  const end = Math.min(State.queue.length, State.queueIndex + 8);
+  const visible = State.queue.slice(start, end);
+  strip.innerHTML = visible.map((s, i) => {
+    const realIdx = start + i;
+    return `<div class="queue-chip ${realIdx === State.queueIndex ? 'current' : ''}" data-qi="${realIdx}">
+      <div class="queue-chip-art" id="qc-${realIdx}">🎵</div>
+      <div class="queue-chip-name">${esc(s.name)}</div>
+    </div>`;
+  }).join('');
+  // Load art
+  visible.forEach((s, i) => {
+    const realIdx = start + i;
+    if (s.artKey) loadArtIntoEl(`qc-${realIdx}`, s.artKey);
+  });
+  strip.querySelectorAll('.queue-chip').forEach(el => {
+    el.addEventListener('click', () => {
+      const qi = parseInt(el.dataset.qi);
+      State.queueIndex = qi;
+      playSong(State.queue[qi]);
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SHUFFLE MODAL
+// ════════════════════════════════════════════════════════════════
+let currentBrowseContext = [];
+function openShuffleModal() {
+  // Figure out current context
+  if (State.browseStack.length > 0) {
+    const top = State.browseStack[State.browseStack.length - 1];
+    if (top.type === 'album') {
+      currentBrowseContext = top.data.songs;
+      document.getElementById('shuffle-folder-name').textContent = top.data.name;
+    } else if (top.type === 'artist') {
+      currentBrowseContext = [...top.data.songs, ...top.data.albums.flatMap(a => a.songs)];
+      document.getElementById('shuffle-folder-name').textContent = top.data.name;
+    }
+  } else if (State.library) {
+    currentBrowseContext = State.library.allSongs;
+    document.getElementById('shuffle-folder-name').textContent = 'All Music';
+  }
+  document.getElementById('shuffle-modal').classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SCREEN MANAGER
+// ════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Show mini player when away from player-screen, hide when on it
+  if (id === 'player-screen') {
+    hideMiniPlayer();
+  } else if (State.currentSong) {
+    showMiniPlayer();
+    updateMiniPlayer(State.currentSong);
+  }
+}
+
+function esc(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  MINI PLAYER BANNER
+// ════════════════════════════════════════════════════════════════
+function updateMiniPlayer(song) {
+  if (!song) return;
+  document.getElementById('mini-title').textContent  = song.name;
+  document.getElementById('mini-artist').textContent = [song.artist, song.album].filter(Boolean).join(' · ');
+  // Art
+  const miniArt = document.getElementById('mini-art');
+  miniArt.innerHTML = '🎵';
+  if (song.artKey) {
+    dbGet('artwork', song.artKey).then(art => {
+      if (art) miniArt.innerHTML = `<img src="${art}" alt="art"/>`;
+    }).catch(() => {});
+  }
+  syncMiniPlayerState();
+}
+
+function syncMiniPlayerState() {
+  // Sync play/pause icons
+  const playing = !Audio.paused;
+  document.getElementById('mini-play-icon').style.display  = playing ? 'none'  : 'block';
+  document.getElementById('mini-pause-icon').style.display = playing ? 'block' : 'none';
+}
+
+function showMiniPlayer() {
+  if (!State.currentSong) return;
+  document.getElementById('mini-player').classList.add('visible');
+  document.body.classList.add('has-mini-player');
+}
+
+function hideMiniPlayer() {
+  document.getElementById('mini-player').classList.remove('visible');
+  document.body.classList.remove('has-mini-player');
+}
+
+// Update mini progress bar in sync with Audio
+Audio.addEventListener('timeupdate', () => {
+  if (!Audio.duration) return;
+  const pct = (Audio.currentTime / Audio.duration) * 100;
+  const fill = document.getElementById('mini-progress-fill');
+  if (fill) fill.style.width = pct + '%';
+});
+
+// Keep play/pause icons in sync
+Audio.addEventListener('play',  syncMiniPlayerState);
+Audio.addEventListener('pause', syncMiniPlayerState);
+
+// ════════════════════════════════════════════════════════════════
+//  LIBRARY SHUFFLE ALL
+// ════════════════════════════════════════════════════════════════
+function startShuffleAll() {
+  if (!State.library || !State.library.allSongs.length) {
+    showToast('Library not loaded yet');
+    return;
+  }
+  const allSongs = State.library.allSongs;
+  // Pick a truly random starting song using crypto
+  const firstIdx = cryptoRandInt(allSongs.length);
+  const firstSong = allSongs[firstIdx];
+
+  State.isShuffleOn = true;
+  State.playedIds   = new Set();
+  State.shuffleHistory = [];
+  savePlayedIds();
+
+  // Mark first song played so smart shuffle won't repeat it immediately
+  State.playedIds.add(firstSong.id);
+  State.shuffleHistory.push(firstSong.id);
+
+  // Highlight shuffle button on player
+  document.getElementById('player-shuffle-btn').classList.add('active');
+
+  playSong(firstSong, allSongs, firstIdx);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  VISUALIZER ENGINE
+// ════════════════════════════════════════════════════════════════
+const Viz = {
+  active:     false,
+  mode:       'stars',   // 'stars' | 'bars' | 'vortex'
+  color:      '#e8c97a',
+  animId:     null,
+  audioCtx:   null,
+  analyser:   null,
+  source:     null,
+  dataArr:    null,
+  canvas:     null,
+  ctx:        null,
+  // per-visualiser state
+  stars:      [],
+  vortexAngle: 0,
+  time:       0,
+};
+
+// ── hex → rgb helper ────────────────────────────────────────
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+
+// ── Bootstrap Web Audio analyser ────────────────────────────
+// IMPORTANT: createMediaElementSource can only be called once per
+// audio element. We guard with Viz.source. AudioContext needs a
+// user gesture — we call this from the button click, which qualifies.
+function vizBootstrapAudio() {
+  try {
+    if (!Viz.audioCtx) {
+      Viz.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (Viz.audioCtx.state === 'suspended') {
+      Viz.audioCtx.resume().catch(() => {});
+    }
+    if (!Viz.analyser) {
+      Viz.analyser = Viz.audioCtx.createAnalyser();
+      Viz.analyser.fftSize = 512;          // more bins = better resolution
+      Viz.analyser.smoothingTimeConstant = 0.75;
+      Viz.dataArr  = new Uint8Array(Viz.analyser.frequencyBinCount);
+    }
+    if (!Viz.source) {
+      // createMediaElementSource throws if called twice — only call once ever
+      Viz.source = Viz.audioCtx.createMediaElementSource(Audio);
+      Viz.source.connect(Viz.analyser);
+      Viz.analyser.connect(Viz.audioCtx.destination);
+    }
+  } catch(e) {
+    console.warn('Visualizer audio setup failed:', e);
+    Viz.audioCtx = null;
+    Viz.analyser = null;
+    Viz.source   = null;
+  }
+}
+
+// ── resize canvas to match display ──────────────────────────
+function vizResize() {
+  const canvas = document.getElementById('viz-canvas');
+  if (!canvas) return;
+  canvas.width  = canvas.offsetWidth  * devicePixelRatio;
+  canvas.height = canvas.offsetHeight * devicePixelRatio;
+}
+
+// ── open visualizer ─────────────────────────────────────────
+function openVisualizer() {
+  // Always try to bootstrap — safe to call multiple times
+  vizBootstrapAudio();
+
+  // Resume context (may be suspended after page load on mobile)
+  if (Viz.audioCtx) {
+    Viz.audioCtx.resume().catch(() => {});
+  }
+
+  Viz.canvas = document.getElementById('viz-canvas');
+  Viz.ctx    = Viz.canvas.getContext('2d');
+  vizResize();
+
+  // Reset loop state
+  if (Viz.animId) {
+    cancelAnimationFrame(Viz.animId);
+    Viz.animId = null;
+  }
+
+  // Initialise visualiser states
+  if (!Viz.stars.length) initStars();
+
+  // sync track info + play state
+  vizUpdateTrackInfo();
+  vizSyncPlayPause();
+
+  // show overlay
+  document.getElementById('viz-overlay').style.display = 'flex';
+  Viz.active = true;
+
+  // start fresh loop
+  vizLoop();
+}
+
+function closeVisualizer() {
+  Viz.active = false;
+  if (Viz.animId) { cancelAnimationFrame(Viz.animId); Viz.animId = null; }
+  document.getElementById('viz-overlay').style.display = 'none';
+}
+
+function vizUpdateTrackInfo() {
+  if (!State.currentSong) return;
+  document.getElementById('viz-track').textContent  = State.currentSong.name;
+  document.getElementById('viz-artist').textContent = [State.currentSong.artist, State.currentSong.album].filter(Boolean).join(' · ');
+}
+
+function vizSyncPlayPause() {
+  const playing = !Audio.paused;
+  document.getElementById('viz-play-icon').style.display  = playing ? 'none'  : 'block';
+  document.getElementById('viz-pause-icon').style.display = playing ? 'block' : 'none';
+}
+
+// ── read frequency data (safe fallback if no analyser) ──────
+function vizGetEnergy() {
+  if (!Viz.analyser || !Viz.dataArr) {
+    // Return silence — bars flat, stars dim, tunnel slow
+    return { avg: 0, bass: 0, mid: 0, high: 0, data: new Uint8Array(128).fill(0) };
+  }
+  Viz.analyser.getByteFrequencyData(Viz.dataArr);
+  const d = Viz.dataArr;
+  const len = d.length;
+  const bassEnd  = Math.floor(len * 0.1);
+  const midEnd   = Math.floor(len * 0.45);
+  let bassSum=0, midSum=0, highSum=0, total=0;
+  for (let i=0;i<len;i++) {
+    total += d[i];
+    if      (i < bassEnd) bassSum += d[i];
+    else if (i < midEnd)  midSum  += d[i];
+    else                  highSum += d[i];
+  }
+  const avg  = total / (len * 255);
+  const bass = bassSum  / (bassEnd * 255);
+  const mid  = midSum   / ((midEnd - bassEnd) * 255);
+  const high = highSum  / ((len - midEnd) * 255);
+  return { avg, bass, mid, high, data: d };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VISUALISATION 1: PS3 Glowing Stars
+// ═══════════════════════════════════════════════════════════
+function initStars() {
+  Viz.stars = [];
+  const count = 200;
+  for (let i = 0; i < count; i++) {
+    // give each star a random direction vector for free-floating movement
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 0.00055 + 0.00018;
+    Viz.stars.push({
+      x:      Math.random(),
+      y:      Math.random(),
+      baseR:  Math.random() * 2.2 + 0.5,
+      phase:  Math.random() * Math.PI * 2,
+      pulseF: Math.random() * 1.4 + 0.6,   // individual pulse frequency
+      vx:     Math.cos(angle) * speed,
+      vy:     Math.sin(angle) * speed,
+    });
+  }
+}
+
+function drawStars(e, w, h) {
+  const { r, g, b } = hexToRgb(Viz.color);
+  const t = performance.now() / 1000;
+  // soft fade trail instead of hard clear — gives gentle motion blur
+  Viz.ctx.fillStyle = 'rgba(0,0,0,0.22)';
+  Viz.ctx.fillRect(0, 0, w, h);
+
+  const beatBoost = 1 + e.bass * 3.0;
+  const energyBoost = 0.6 + e.avg * 1.2;
+
+  for (const s of Viz.stars) {
+    // free float — slightly speed up on bass hits
+    const speedMult = 1 + e.bass * 1.8;
+    s.x += s.vx * speedMult;
+    s.y += s.vy * speedMult;
+    // wrap around edges
+    if (s.x < -0.02) s.x = 1.02;
+    if (s.x > 1.02)  s.x = -0.02;
+    if (s.y < -0.02) s.y = 1.02;
+    if (s.y > 1.02)  s.y = -0.02;
+
+    const pulse  = 0.5 + 0.5 * Math.sin(t * s.pulseF + s.phase);
+    const radius = s.baseR * devicePixelRatio * pulse * beatBoost;
+    const alpha  = Math.min(1, 0.25 + 0.75 * pulse * energyBoost);
+
+    const sx = s.x * w, sy = s.y * h;
+
+    // outer glow halo
+    const glowR = radius * 5;
+    const grd = Viz.ctx.createRadialGradient(sx, sy, 0, sx, sy, glowR);
+    grd.addColorStop(0,   `rgba(${r},${g},${b},${alpha * 0.6})`);
+    grd.addColorStop(0.4, `rgba(${r},${g},${b},${alpha * 0.15})`);
+    grd.addColorStop(1,   'rgba(0,0,0,0)');
+    Viz.ctx.beginPath();
+    Viz.ctx.arc(sx, sy, glowR, 0, Math.PI * 2);
+    Viz.ctx.fillStyle = grd;
+    Viz.ctx.fill();
+
+    // bright core
+    Viz.ctx.beginPath();
+    Viz.ctx.arc(sx, sy, Math.max(0.5, radius), 0, Math.PI * 2);
+    Viz.ctx.fillStyle = `rgba(255,255,255,${Math.min(1, alpha * 1.1)})`;
+    Viz.ctx.fill();
+  }
+  // NO horizontal streak — removed per request
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VISUALISATION 2: Equalizer Bars
+//  Bars start flat (silence = 0 height) and grow upward.
+//  Left bars = bass frequencies, right bars = treble.
+// ═══════════════════════════════════════════════════════════
+// Smoothed bar heights (prevent jitter)
+let _barHeights = null;
+
+function drawBars(e, w, h) {
+  const { r, g, b } = hexToRgb(Viz.color);
+  Viz.ctx.clearRect(0, 0, w, h);
+
+  const barCount = 52;
+  const margin   = w * 0.02;
+  const totalW   = w - margin * 2;
+  const gap      = Math.max(1, Math.floor(totalW * 0.006));
+  const barW     = (totalW - gap * (barCount - 1)) / barCount;
+
+  // Initialise smoothing array
+  if (!_barHeights || _barHeights.length !== barCount) {
+    _barHeights = new Float32Array(barCount);
+  }
+
+  // Map frequency bins: use only lower ~70% of FFT data (audible range)
+  const usable = Math.floor(e.data.length * 0.70);
+  // Apply logarithmic frequency spacing so bass isn't over-represented
+  for (let i = 0; i < barCount; i++) {
+    const logT  = Math.pow(i / barCount, 1.6);          // log-ish curve
+    const binF  = logT * usable;
+    const binLo = Math.floor(binF);
+    const binHi = Math.min(usable - 1, binLo + Math.max(1, Math.floor(usable / barCount)));
+    let sum = 0;
+    for (let b2 = binLo; b2 <= binHi; b2++) sum += e.data[b2];
+    const raw = sum / ((binHi - binLo + 1) * 255);
+    // Smooth: 70% old + 30% new  (fast rise, slower fall)
+    _barHeights[i] = _barHeights[i] * (raw > _barHeights[i] ? 0.3 : 0.72) + raw * (raw > _barHeights[i] ? 0.7 : 0.28);
+  }
+
+  // floor line
+  const floorY = h - 2 * devicePixelRatio;
+  Viz.ctx.fillStyle = `rgba(${r},${g},${b},0.18)`;
+  Viz.ctx.fillRect(margin, floorY, totalW, 2 * devicePixelRatio);
+
+  for (let i = 0; i < barCount; i++) {
+    const val  = _barHeights[i];
+    // minimum 1px so flat state is visible as a thin line
+    const barH = Math.max(2 * devicePixelRatio, val * (h - 10 * devicePixelRatio) * 0.92);
+    const x    = margin + i * (barW + gap);
+    const y    = h - barH;
+
+    // Colour: low freq = warmer tint, high freq = cooler via hue shift
+    const hueShift = i / barCount;        // 0 = bass, 1 = treble
+    const rr = Math.round(r * (1 - hueShift * 0.3));
+    const gg = Math.round(g * (1 - hueShift * 0.1));
+    const bb = Math.round(b + (255 - b) * hueShift * 0.25);
+
+    // gradient: bright at top cap, fades toward base
+    const grd = Viz.ctx.createLinearGradient(x, y, x, h);
+    grd.addColorStop(0,   `rgba(${rr},${gg},${bb},${0.9 + val * 0.1})`);
+    grd.addColorStop(0.5, `rgba(${rr},${gg},${bb},0.65)`);
+    grd.addColorStop(1,   `rgba(${rr},${gg},${bb},0.2)`);
+    Viz.ctx.fillStyle = grd;
+
+    const rad = Math.min(barW / 2, 3 * devicePixelRatio);
+    Viz.ctx.beginPath();
+    // rounded top only
+    if (Viz.ctx.roundRect) {
+      Viz.ctx.roundRect(x, y, barW, barH, [rad, rad, 0, 0]);
+    } else {
+      Viz.ctx.rect(x, y, barW, barH);
+    }
+    Viz.ctx.fill();
+
+    // glowing cap dot at top
+    if (val > 0.04) {
+      const capR = barW * 1.8;
+      const capGrd = Viz.ctx.createRadialGradient(x + barW/2, y, 0, x + barW/2, y, capR);
+      capGrd.addColorStop(0, `rgba(${rr},${gg},${bb},${0.35 + val * 0.55})`);
+      capGrd.addColorStop(1, 'rgba(0,0,0,0)');
+      Viz.ctx.beginPath();
+      Viz.ctx.arc(x + barW/2, y, capR, 0, Math.PI * 2);
+      Viz.ctx.fillStyle = capGrd;
+      Viz.ctx.fill();
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VISUALISATION 3: Circular Electric Tunnel
+//  You zoom into a cylindrical tube with electrified walls.
+//  Black center, circular rings fly toward you, arcs crackle
+//  on the tube wall at the rhythm of the music.
+// ═══════════════════════════════════════════════════════════
+let _tunnelRings = null;
+
+function initTunnel(n) {
+  _tunnelRings = Array.from({ length: n }, (_, i) => ({
+    z:         i / n,                           // depth 0=far 1=close
+    arcOffset: Math.random() * Math.PI * 2,     // where the arc starts on ring
+    arcLen:    Math.random() * 1.2 + 0.4,       // arc length in radians
+    arcDir:    Math.random() < 0.5 ? 1 : -1,   // arc rotation direction
+    arcSpd:    Math.random() * 0.04 + 0.01,
+  }));
+}
+
+function drawVortex(e, w, h) {
+  const { r, g, b } = hexToRgb(Viz.color);
+  Viz.time += 0.016;
+
+  const zoomSpeed = 0.006 + e.avg * 0.016 + e.bass * 0.045;
+
+  const RINGS = 22;
+  if (!_tunnelRings || _tunnelRings.length !== RINGS) initTunnel(RINGS);
+
+  // Motion-blur trail — black center stays intact
+  Viz.ctx.fillStyle = `rgba(0,0,0,${0.14 + e.avg * 0.07})`;
+  Viz.ctx.fillRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h / 2;
+  const maxRadius = Math.min(w, h) * 0.46;   // tube radius at viewer plane
+
+  // Advance rings toward viewer
+  for (const ring of _tunnelRings) {
+    ring.z += zoomSpeed;
+    ring.arcOffset += ring.arcDir * ring.arcSpd;
+    if (ring.z >= 1.0) {
+      ring.z        -= 1.0;
+      ring.arcOffset = Math.random() * Math.PI * 2;
+      ring.arcLen    = Math.random() * 1.2 + 0.4;
+      ring.arcDir    = Math.random() < 0.5 ? 1 : -1;
+      ring.arcSpd    = Math.random() * 0.04 + 0.01;
+    }
+  }
+
+  // Draw back-to-front
+  const sorted = [..._tunnelRings].sort((a, b2) => a.z - b2.z);
+
+  for (const ring of sorted) {
+    const z      = ring.z;
+    // Perspective: rings far away are tiny, close rings fill screen
+    const perspective = z * z * z;             // cubic for fast zoom feel
+    const radius = maxRadius * perspective;
+    if (radius < 1.5) continue;
+
+    // Map depth to frequency bin
+    const binIdx = Math.floor(z * (e.data.length - 1));
+    const energy = e.data[binIdx] / 255;
+
+    const alpha = Math.min(0.92, 0.05 + energy * 0.65 + perspective * 0.35);
+    const thick = Math.max(0.5, (0.8 + energy * 4.0 + perspective * 2.0)) * devicePixelRatio;
+    const bright = Math.floor(140 + energy * 115);
+    const rr = Math.min(255, Math.round(bright * r / 230));
+    const gg = Math.min(255, Math.round(bright * g / 230));
+    const bb = Math.min(255, Math.round(bright * b / 230));
+
+    // ── TUBE WALL: full circle (the tube cross-section) ─────
+    Viz.ctx.beginPath();
+    Viz.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    Viz.ctx.strokeStyle = `rgba(${rr},${gg},${bb},${alpha * 0.55})`;
+    Viz.ctx.lineWidth   = thick;
+    Viz.ctx.stroke();
+
+    // ── ELECTRIC ARC along tube wall ────────────────────────
+    if (energy > 0.12) {
+      const arcStart = ring.arcOffset;
+      const arcEnd   = arcStart + ring.arcLen * (0.5 + energy);
+      const segs     = 8 + Math.floor(energy * 10);
+      const jitter   = radius * 0.07 * energy;
+
+      Viz.ctx.beginPath();
+      for (let s = 0; s <= segs; s++) {
+        const t     = s / segs;
+        const angle = arcStart + (arcEnd - arcStart) * t;
+        const jr    = radius + (Math.random() - 0.5) * jitter * 2;
+        const px    = cx + Math.cos(angle) * jr;
+        const py    = cy + Math.sin(angle) * jr;
+        s === 0 ? Viz.ctx.moveTo(px, py) : Viz.ctx.lineTo(px, py);
+      }
+      Viz.ctx.strokeStyle = `rgba(${rr},${gg},${bb},${Math.min(0.98, energy * 1.1 + 0.1)})`;
+      Viz.ctx.lineWidth   = Math.max(0.5, (1.5 + energy * 3)) * devicePixelRatio;
+      Viz.ctx.stroke();
+
+      // glow bloom on arc
+      if (energy > 0.35) {
+        const glowR = radius * 0.22 * energy;
+        const midA  = arcStart + (arcEnd - arcStart) * 0.5;
+        const gx    = cx + Math.cos(midA) * radius;
+        const gy    = cy + Math.sin(midA) * radius;
+        const bloom = Viz.ctx.createRadialGradient(gx, gy, 0, gx, gy, glowR);
+        bloom.addColorStop(0, `rgba(${rr},${gg},${bb},${energy * 0.7})`);
+        bloom.addColorStop(1, 'rgba(0,0,0,0)');
+        Viz.ctx.beginPath();
+        Viz.ctx.arc(gx, gy, glowR, 0, Math.PI * 2);
+        Viz.ctx.fillStyle = bloom;
+        Viz.ctx.fill();
+      }
+    }
+  }
+
+  // ── TUNNEL INTERIOR: black circle to enforce hollow look ──
+  // Anything inside the smallest visible ring is pure black
+  Viz.ctx.beginPath();
+  Viz.ctx.arc(cx, cy, maxRadius * 0.035 + 2, 0, Math.PI * 2);
+  Viz.ctx.fillStyle = '#000';
+  Viz.ctx.fill();
+
+  // ── VANISHING POINT GLOW ─────────────────────────────────
+  const vpR  = maxRadius * 0.12 * (1 + e.bass * 0.8);
+  const vpGrd = Viz.ctx.createRadialGradient(cx, cy, 0, cx, cy, vpR);
+  vpGrd.addColorStop(0, `rgba(${r},${g},${b},${0.4 + e.bass * 0.55})`);
+  vpGrd.addColorStop(0.5, `rgba(${r},${g},${b},0.06)`);
+  vpGrd.addColorStop(1, 'rgba(0,0,0,0)');
+  Viz.ctx.beginPath();
+  Viz.ctx.arc(cx, cy, vpR, 0, Math.PI * 2);
+  Viz.ctx.fillStyle = vpGrd;
+  Viz.ctx.fill();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAIN ANIMATION LOOP
+// ═══════════════════════════════════════════════════════════
+function vizLoop() {
+  if (!Viz.active) return;
+  const canvas = Viz.canvas;
+  const w = canvas.width, h = canvas.height;
+  const e = vizGetEnergy();
+
+  if      (Viz.mode === 'stars')  drawStars(e, w, h);
+  else if (Viz.mode === 'bars')   drawBars(e, w, h);
+  else if (Viz.mode === 'vortex') drawVortex(e, w, h);
+
+  Viz.animId = requestAnimationFrame(vizLoop);
+}
+
+// ── mode switcher ────────────────────────────────────────────
+function vizSetMode(mode) {
+  Viz.mode = mode;
+  if (mode === 'vortex') {
+    Viz.ctx && Viz.ctx.clearRect(0, 0, Viz.canvas.width, Viz.canvas.height);
+    Viz.vortexAngle = 0; Viz.time = 0;
+    _tunnelRings = null; // force re-init with fresh ring distribution
+  }
+  if (mode === 'bars') {
+    _barHeights = null; // reset smoothing
+  }
+  if (mode === 'stars') {
+    // re-init stars for fresh movement directions
+    Viz.stars = []; initStars();
+  }
+  document.querySelectorAll('.viz-mode-btn').forEach(btn => {
+    const active = btn.dataset.mode === mode;
+    btn.style.background = active ? 'rgba(255,255,255,0.18)' : 'transparent';
+    btn.style.color      = active ? '#fff' : 'rgba(255,255,255,0.5)';
+    btn.style.borderColor= active ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)';
+  });
+}
+
+// keep resize in sync
+window.addEventListener('resize', () => { if (Viz.active) vizResize(); });
+Audio.addEventListener('play',  vizSyncPlayPause);
+Audio.addEventListener('pause', vizSyncPlayPause);
+
+// ════════════════════════════════════════════════════════════════
+//  DELETE ENGINE
+// ════════════════════════════════════════════════════════════════
+const DeleteState = {
+  pending:  null,    // single song object OR array of songs
+  mode:     'single',// 'single' | 'multi'
+  selecting: false,  // multi-select active
+  selected: new Set(),// song IDs selected for deletion
+};
+
+// Open confirm modal for a single song or multi-selection
+function openDeleteConfirm(songs, mode) {
+  DeleteState.pending = songs;
+  DeleteState.mode    = mode || 'single';
+
+  const isMulti   = Array.isArray(songs);
+  const count     = isMulti ? songs.length : 1;
+  const msgEl     = document.getElementById('delete-modal-msg');
+  const labelEl   = document.getElementById('delete-confirm-label');
+  const subEl     = document.getElementById('delete-confirm-sub');
+
+  if (isMulti && count > 1) {
+    msgEl.textContent   = `This will permanently remove ${count} song${count !== 1 ? 's' : ''} from Google Drive. This cannot be undone.`;
+    labelEl.textContent = `Yes, delete ${count} songs`;
+  } else {
+    const name = isMulti ? songs[0].name : songs.name;
+    msgEl.textContent   = `"${name}" will be permanently removed from Google Drive. This cannot be undone.`;
+    labelEl.textContent = 'Yes, delete';
+  }
+  subEl.textContent = 'Files moved to Drive trash (recoverable from drive.google.com)';
+  document.getElementById('delete-modal').classList.add('active');
+}
+
+// Execute the actual deletion
+async function executeDelete() {
+  document.getElementById('delete-modal').classList.remove('active');
+
+  const songs = Array.isArray(DeleteState.pending)
+    ? DeleteState.pending
+    : [DeleteState.pending];
+
+  let done = 0, failed = 0;
+  showToast(`Deleting ${songs.length} song${songs.length !== 1 ? 's' : ''}…`);
+
+  for (const song of songs) {
+    try {
+      await driveDelete(song.id);
+      await sleep(100);
+      removeSongFromLibrary(song);
+      done++;
+    } catch(e) {
+      failed++;
+      console.warn('Delete failed for', song.name, e.message);
+    }
+  }
+
+  // Persist updated library
+  await dbSet('library', 'data', State.library);
+
+  // If the deleted song was playing, stop and go to library
+  if (State.currentSong && songs.some(s => s.id === State.currentSong.id)) {
+    Audio.pause();
+    Audio.src = '';
+    State.currentSong = null;
+    hideMiniPlayer();
+    showLibrary();
+  }
+
+  // Exit multi-select mode
+  exitDeleteSelect();
+
+  // Refresh current view
+  if (document.getElementById('browse-screen').classList.contains('active')) {
+    renderBrowse();
+  } else if (document.getElementById('library-screen').classList.contains('active')) {
+    renderLibraryTab(State.currentTab);
+  }
+
+  const msg = done > 0
+    ? `${done} song${done !== 1 ? 's' : ''} deleted${failed > 0 ? `, ${failed} failed` : ''}`
+    : `Delete failed`;
+  showToast(msg);
+}
+
+// Remove a song from in-memory library
+function removeSongFromLibrary(song) {
+  if (!State.library) return;
+  // Remove from allSongs
+  State.library.allSongs = State.library.allSongs.filter(s => s.id !== song.id);
+  // Remove from artist songs and album songs
+  for (const artist of State.library.artists) {
+    artist.songs = artist.songs.filter(s => s.id !== song.id);
+    for (const album of artist.albums) {
+      album.songs = album.songs.filter(s => s.id !== song.id);
+    }
+    // Remove empty albums
+    artist.albums = artist.albums.filter(a => a.songs.length > 0);
+  }
+  // Remove empty artists
+  State.library.artists = State.library.artists.filter(
+    a => a.songs.length > 0 || a.albums.length > 0
+  );
+  // Remove from queue
+  State.queue = State.queue.filter(s => s.id !== song.id);
+  if (State.queueIndex >= State.queue.length) State.queueIndex = 0;
+  // Remove from favorites
+  State.favorites.delete(song.id);
+  saveFavorites();
+}
+
+// ── Multi-select mode ────────────────────────────────────────
+function enterDeleteSelect() {
+  DeleteState.selecting = true;
+  DeleteState.selected  = new Set();
+  document.getElementById('delete-select-bar').classList.add('active');
+  updateDeleteBar();
+}
+
+function exitDeleteSelect() {
+  DeleteState.selecting = false;
+  DeleteState.selected  = new Set();
+  document.getElementById('delete-select-bar').classList.remove('active');
+  // Remove selection highlight from all items
+  document.querySelectorAll('.lib-item.delete-selected, .browse-item.delete-selected')
+    .forEach(el => el.classList.remove('delete-selected'));
+}
+
+function updateDeleteBar() {
+  const count = DeleteState.selected.size;
+  document.getElementById('dsb-count').textContent =
+    count === 0 ? 'Tap songs to select' : `${count} song${count !== 1 ? 's' : ''} selected`;
+  document.getElementById('dsb-delete-btn').disabled = count === 0;
+}
+
+function toggleDeleteSelect(songId, el) {
+  if (DeleteState.selected.has(songId)) {
+    DeleteState.selected.delete(songId);
+    el && el.classList.remove('delete-selected');
+  } else {
+    DeleteState.selected.add(songId);
+    el && el.classList.add('delete-selected');
+  }
+  updateDeleteBar();
+}
+
+// ── Delete from now-playing menu ─────────────────────────────
+document.getElementById('menu-delete-song').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  if (!State.currentSong) return;
+  openDeleteConfirm(State.currentSong, 'single');
+});
+
+// ── Delete confirm / cancel ──────────────────────────────────
+document.getElementById('delete-confirm-btn').addEventListener('click', executeDelete);
+
+document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+  document.getElementById('delete-modal').classList.remove('active');
+});
+
+document.getElementById('delete-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('delete-modal')) {
+    document.getElementById('delete-modal').classList.remove('active');
+  }
+});
+
+// ── Multi-select bar buttons ─────────────────────────────────
+document.getElementById('dsb-cancel-btn').addEventListener('click', () => {
+  exitDeleteSelect();
+  if (document.getElementById('library-screen').classList.contains('active')) {
+    renderLibraryTab(State.currentTab);
+  } else if (document.getElementById('browse-screen').classList.contains('active')) {
+    renderBrowse();
+  }
+});
+
+document.getElementById('dsb-delete-btn').addEventListener('click', () => {
+  if (!DeleteState.selected.size) return;
+  const songs = State.library.allSongs.filter(s => DeleteState.selected.has(s.id));
+  openDeleteConfirm(songs, 'multi');
+});
+
+// ════════════════════════════════════════════════════════════════
+//  EVENT WIRING
+// ════════════════════════════════════════════════════════════════
+// Auth
+// Sign-in button wired in GIS auth section above
+
+// Lib tabs
+document.querySelectorAll('.lib-tab').forEach(t => {
+  t.addEventListener('click', () => renderLibraryTab(t.dataset.tab));
+});
+
+// Lib search
+document.getElementById('lib-search-input').addEventListener('input', () => {
+  renderLibraryTab(State.currentTab);
+});
+
+// Fav lib btn → go to favorites tab
+document.getElementById('fav-lib-btn').addEventListener('click', () => {
+  renderLibraryTab('favorites');
+});
+
+// Rescan
+document.getElementById('lib-rescan-btn').addEventListener('click', () => {
+  dbSet('meta', 'firstLaunch', false);
+  scanLibrary();
+});
+
+// Library shuffle-all button
+document.getElementById('lib-shuffle-all-btn').addEventListener('click', startShuffleAll);
+
+// Mini player banner buttons
+document.getElementById('mini-play-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  playPause();
+});
+document.getElementById('mini-prev-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  prevTrack();
+});
+document.getElementById('mini-next-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  nextTrack();
+});
+// Clicking the banner body (not buttons) → go to player screen
+document.getElementById('mini-body').addEventListener('click', () => {
+  showScreen('player-screen');
+  hideMiniPlayer();
+});
+
+// ── Visualizer controls ────────────────────────────────────
+document.getElementById('player-viz-btn').addEventListener('click', () => {
+  if (!State.currentSong) { showToast('Play a song first'); return; }
+  openVisualizer();
+});
+document.getElementById('viz-close').addEventListener('click', closeVisualizer);
+
+document.getElementById('viz-play').addEventListener('click', () => {
+  playPause();
+  vizSyncPlayPause();
+});
+document.getElementById('viz-prev').addEventListener('click', () => {
+  prevTrack();
+  setTimeout(vizUpdateTrackInfo, 300);
+});
+document.getElementById('viz-next').addEventListener('click', () => {
+  nextTrack();
+  setTimeout(vizUpdateTrackInfo, 300);
+});
+
+document.querySelectorAll('.viz-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => vizSetMode(btn.dataset.mode));
+});
+
+document.getElementById('viz-color-picker').addEventListener('input', e => {
+  Viz.color = e.target.value;
+});
+
+// update track info whenever song changes while visualizer is open
+const _origUpdateUI = updatePlayerUI;
+// patch already handled via vizUpdateTrackInfo called inside playSong chain
+
+// ════════════════════════════════════════════════════════════
+//  LOGOUT CONFIRM — intercepts hardware back + button tap
+// ════════════════════════════════════════════════════════════
+
+function showLogoutModal() {
+  document.getElementById('logout-modal').classList.add('active');
+}
+
+function hideLogoutModal() {
+  document.getElementById('logout-modal').classList.remove('active');
+}
+
+function doLogout() {
+  hideLogoutModal();
+
+  // Revoke GIS token so next silent request will re-prompt
+  if (State.token && typeof google !== 'undefined' && google.accounts) {
+    try { google.accounts.oauth2.revoke(State.token, () => {}); } catch(e) {}
+  }
+
+  State.token = null;
+  localStorage.removeItem('dp_token');
+  localStorage.removeItem('dp_expiry');
+
+  Audio.pause();
+  Audio.src = '';
+  State.currentSong = null;
+  hideMiniPlayer();
+  if (typeof closeVisualizer === 'function') closeVisualizer();
+
+  // Reset the in-progress guard so a new sign-in can be requested
+  _authInProgress = false;
+
+  // Show auth screen with manual button (since token was revoked,
+  // silent request would fail — let user tap to sign in cleanly)
+  showScreen('auth-screen');
+  showAuthFallback('Signed out. Tap to sign in again.');
+}
+
+// Library logout button (top-left of library header)
+document.getElementById('lib-logout-btn').addEventListener('click', showLogoutModal);
+
+// Logout modal confirm
+document.getElementById('logout-confirm-btn').addEventListener('click', doLogout);
+
+// Logout modal cancel → go back to library
+document.getElementById('logout-cancel-btn').addEventListener('click', () => {
+  hideLogoutModal();
+  showLibrary();
+});
+
+// Tap overlay to cancel
+document.getElementById('logout-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('logout-modal')) {
+    hideLogoutModal();
+  }
+});
+
+// ── Long-press "Library" title (700ms) → logout confirmation ─
+// This is the only trigger — no visible button, no back-button hack.
+(function wireLongPressLogout() {
+  const titleEl = document.getElementById('lib-title-text');
+  if (!titleEl) return;
+  let _timer = null;
+  let _moved = false;
+  function startPress() {
+    _moved = false;
+    _timer = setTimeout(() => {
+      if (!_moved && document.getElementById('library-screen').classList.contains('active')) {
+        showLogoutModal();
+      }
+    }, 700);
+  }
+  function cancelPress() { clearTimeout(_timer); }
+  function movePress()   { _moved = true; clearTimeout(_timer); }
+  titleEl.addEventListener('touchstart',  startPress, { passive: true });
+  titleEl.addEventListener('touchend',    cancelPress);
+  titleEl.addEventListener('touchcancel', cancelPress);
+  titleEl.addEventListener('touchmove',   movePress,  { passive: true });
+  titleEl.addEventListener('mousedown',   startPress);
+  titleEl.addEventListener('mouseup',     cancelPress);
+  titleEl.addEventListener('mouseleave',  cancelPress);
+  titleEl.addEventListener('mousemove',   movePress);
+  titleEl.addEventListener('contextmenu', e => e.preventDefault());
+})();
+
+// ── Intercept hardware/gesture back button (Android Chrome) ─
+// Strategy: always keep a sentinel history entry on top.
+// When the user presses back, the browser pops our sentinel,
+// we catch popstate and show the confirm dialog (then push
+// the sentinel again so the next back press also gets caught).
+
+function pushBackSentinel() {
+  history.pushState({ dpSentinel: true }, '');
+}
+
+window.addEventListener('popstate', (event) => {
+  // If a modal is open, close it instead of doing anything else
+  const openModal = document.querySelector('.modal-overlay.active');
+  if (openModal) {
+    openModal.classList.remove('active');
+    pushBackSentinel(); // re-push so next back still works
+    return;
+  }
+
+  // If visualizer is open, close it
+  if (typeof Viz !== 'undefined' && Viz.active) {
+    closeVisualizer();
+    pushBackSentinel();
+    return;
+  }
+
+  // If on player screen → go to library/browse
+  const playerActive = document.getElementById('player-screen').classList.contains('active');
+  if (playerActive) {
+    if (State.browseStack.length > 0) showScreen('browse-screen');
+    else showLibrary();
+    pushBackSentinel();
+    return;
+  }
+
+  // If on browse screen with depth > 1 → go up one level
+  const browseActive = document.getElementById('browse-screen').classList.contains('active');
+  if (browseActive && State.browseStack.length > 1) {
+    State.browseStack.pop();
+    renderBrowse();
+    pushBackSentinel();
+    return;
+  }
+
+  // If on browse screen at root → go to library
+  if (browseActive) {
+    showLibrary();
+    pushBackSentinel();
+    return;
+  }
+
+  // If on library screen → show logout confirm
+  const libActive = document.getElementById('library-screen').classList.contains('active');
+  if (libActive) {
+    showLogoutModal();
+    pushBackSentinel(); // re-push so dismissing modal doesn't exit
+    return;
+  }
+
+  // Any other screen (scan etc.) — ignore, re-push sentinel
+  pushBackSentinel();
+});
+
+// Browse back
+document.getElementById('browse-back-btn').addEventListener('click', () => {
+  if (State.browseStack.length > 1) {
+    State.browseStack.pop();
+    renderBrowse();
+  } else {
+    showScreen('library-screen');
+  }
+});
+
+// Player back to lib — showScreen will handle mini player automatically
+document.getElementById('player-back-to-lib').addEventListener('click', () => {
+  if (State.browseStack.length > 0) showScreen('browse-screen');
+  else showLibrary();
+});
+
+// Controls
+document.getElementById('ctrl-play').addEventListener('click', playPause);
+document.getElementById('ctrl-prev').addEventListener('click', prevTrack);
+document.getElementById('ctrl-next').addEventListener('click', nextTrack);
+document.getElementById('ctrl-lib').addEventListener('click', showLibrary);
+document.getElementById('ctrl-repeat').addEventListener('click', () => {
+  State.repeatMode = (State.repeatMode + 1) % 3;
+  const btn = document.getElementById('ctrl-repeat');
+  btn.classList.toggle('active', State.repeatMode > 0);
+  const labels = ['Repeat Off', 'Repeat All', 'Repeat One'];
+  showToast(labels[State.repeatMode]);
+});
+
+// Shuffle btn on player
+document.getElementById('player-shuffle-btn').addEventListener('click', () => {
+  openShuffleModal();
+});
+
+// Shuffle modal
+document.getElementById('shuffle-folder-btn').addEventListener('click', () => {
+  document.getElementById('shuffle-modal').classList.remove('active');
+  const songs = currentBrowseContext.length > 0 ? currentBrowseContext : (State.library ? State.library.allSongs : []);
+  if (songs.length) {
+    State.isShuffleOn = true;
+    State.playedIds = new Set();
+    State.shuffleHistory = [];
+    savePlayedIds();
+    document.getElementById('player-shuffle-btn').classList.add('active');
+    // Don't pre-shuffle — pick first song randomly from raw pool
+    const firstIdx = cryptoRandInt(songs.length);
+    const firstSong = songs[firstIdx];
+    State.playedIds.add(firstSong.id);
+    State.shuffleHistory.push(firstSong.id);
+    playSong(firstSong, songs, firstIdx);
+  }
+});
+document.getElementById('shuffle-all-btn').addEventListener('click', () => {
+  document.getElementById('shuffle-modal').classList.remove('active');
+  if (!State.library) return;
+  const allSongs = State.library.allSongs;
+  State.isShuffleOn = true;
+  State.playedIds = new Set();
+  State.shuffleHistory = [];
+  savePlayedIds();
+  document.getElementById('player-shuffle-btn').classList.add('active');
+  const firstIdx = cryptoRandInt(allSongs.length);
+  const firstSong = allSongs[firstIdx];
+  State.playedIds.add(firstSong.id);
+  State.shuffleHistory.push(firstSong.id);
+  playSong(firstSong, allSongs, firstIdx);
+});
+document.getElementById('shuffle-cancel').addEventListener('click', () => {
+  document.getElementById('shuffle-modal').classList.remove('active');
+});
+
+// Player fav btn
+document.getElementById('player-fav-btn').addEventListener('click', () => {
+  if (State.currentSong) toggleFavorite(State.currentSong.id);
+});
+
+// Menu btn
+document.getElementById('player-menu-btn').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.add('active');
+});
+document.getElementById('menu-cancel').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+});
+document.getElementById('menu-fullscreen').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  State.isFullscreen = !State.isFullscreen;
+  document.getElementById('player-screen').classList.toggle('fullscreen', State.isFullscreen);
+  document.getElementById('fullscreen-label').textContent = State.isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen';
+  if (State.isFullscreen) {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  } else {
+    document.exitFullscreen?.().catch(() => {});
+  }
+});
+document.getElementById('menu-sleep').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  document.getElementById('sleep-modal').classList.add('active');
+});
+document.getElementById('menu-rescan').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  scanLibrary();
+});
+
+// Sleep timer
+document.querySelectorAll('[data-sleep]').forEach(el => {
+  el.addEventListener('click', () => {
+    document.getElementById('sleep-modal').classList.remove('active');
+    const min = parseInt(el.dataset.sleep);
+    if (State.sleepTimer) clearTimeout(State.sleepTimer);
+    if (min === 0) {
+      State.sleepMinutes = 0;
+      document.getElementById('sleep-label').textContent = 'Stop playback after…';
+      showToast('Sleep timer cancelled');
+    } else {
+      State.sleepMinutes = min;
+      document.getElementById('sleep-label').textContent = `Active: ${min} min`;
+      showToast(`Sleep timer: ${min} minutes`);
+      State.sleepTimer = setTimeout(() => {
+        Audio.pause();
+        State.isPlaying = false;
+        document.getElementById('play-icon').style.display = 'block';
+        document.getElementById('pause-icon').style.display = 'none';
+        showToast('Sleep timer ended playback');
+      }, min * 60 * 1000);
+    }
+  });
+});
+
+// Close modals on overlay tap
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+});
+
+// ════════════════════════════════════════════════════════════════
+//  RENAME — artist folder, album folder, or song file
+// ════════════════════════════════════════════════════════════════
+const Rename = {
+  type: null,    // 'artist' | 'album' | 'song'
+  item: null,    // the object being renamed
+  fileId: null,  // Drive file/folder ID
+};
+
+function openRenameModal(type, item) {
+  Rename.type = type;
+  Rename.item = item;
+
+  // Determine Drive ID and display name
+  let driveId, displayName, labelText, titleText;
+  if (type === 'artist') {
+    driveId      = item.id;
+    displayName  = item.name;
+    labelText    = 'Artist folder name';
+    titleText    = 'Rename Artist';
+  } else if (type === 'album') {
+    driveId      = item.id;
+    displayName  = item.name;
+    labelText    = 'Album folder name';
+    titleText    = 'Rename Album';
+  } else if (type === 'song') {
+    driveId      = item.id;
+    // Use fileName (with extension) for Drive; display clean name
+    displayName  = item.name; // clean display name (no extension, no track number)
+    labelText    = 'Song title';
+    titleText    = 'Rename Song';
+  }
+
+  Rename.fileId = driveId;
+
+  document.getElementById('rename-modal-title').textContent = titleText;
+  document.getElementById('rename-modal-label').textContent = labelText;
+  document.getElementById('rename-input').value = displayName;
+  document.getElementById('rename-status-text').textContent = '';
+  document.getElementById('rename-status').classList.remove('loading');
+  document.getElementById('rename-save-btn').disabled = false;
+  document.getElementById('rename-modal').classList.add('active');
+
+  // Focus input and select all text
+  setTimeout(() => {
+    const inp = document.getElementById('rename-input');
+    inp.focus();
+    inp.select();
+  }, 100);
+}
+
+async function executeRename() {
+  const input    = document.getElementById('rename-input');
+  const statusEl = document.getElementById('rename-status');
+  const statusTx = document.getElementById('rename-status-text');
+  const saveBtn  = document.getElementById('rename-save-btn');
+
+  const newDisplayName = input.value.trim();
+  if (!newDisplayName) {
+    statusTx.textContent = 'Name cannot be empty.';
+    return;
+  }
+  if (newDisplayName === Rename.item.name) {
+    document.getElementById('rename-modal').classList.remove('active');
+    return;
+  }
+
+  statusEl.classList.add('loading');
+  statusTx.textContent = 'Renaming on Google Drive…';
+  saveBtn.disabled = true;
+
+  try {
+    let driveNewName;
+
+    if (Rename.type === 'song') {
+      // Preserve file extension and any leading track number
+      const fileName = Rename.item.fileName || '';
+      const extMatch = fileName.match(/(\.[a-zA-Z0-9]+)$/);
+      const ext      = extMatch ? extMatch[1] : '';
+      // Preserve leading track number prefix if present (e.g. "01 - ")
+      const prefixMatch = fileName.match(/^(\d+[\s.\-_]+)/);
+      const prefix   = prefixMatch ? prefixMatch[1] : '';
+      driveNewName   = prefix + newDisplayName + ext;
+    } else {
+      // Folders: name is just the display name
+      driveNewName = newDisplayName;
+    }
+
+    // Call Drive API PATCH
+    await driveRename(Rename.fileId, driveNewName);
+
+    // Update in-memory library
+    applyRenameToLibrary(Rename.type, Rename.item, newDisplayName, driveNewName);
+
+    // Persist updated library to IndexedDB
+    await dbSet('library', 'data', State.library);
+
+    statusEl.classList.remove('loading');
+    statusTx.textContent = 'Renamed successfully ✓';
+
+    setTimeout(() => {
+      document.getElementById('rename-modal').classList.remove('active');
+      showToast(`Renamed to "${newDisplayName}"`);
+      // Refresh current view
+      if (document.getElementById('browse-screen').classList.contains('active')) {
+        renderBrowse();
+      } else if (document.getElementById('library-screen').classList.contains('active')) {
+        renderLibraryTab(State.currentTab);
+      }
+    }, 600);
+
+  } catch(e) {
+    statusEl.classList.remove('loading');
+    statusTx.textContent = 'Error: ' + e.message;
+    saveBtn.disabled = false;
+  }
+}
+
+function applyRenameToLibrary(type, item, newDisplayName, newDriveName) {
+  if (!State.library) return;
+
+  if (type === 'artist') {
+    // Update artist object
+    const artist = State.library.artists.find(a => a.id === item.id);
+    if (artist) {
+      artist.name = newDisplayName;
+      // Update all songs under this artist
+      State.library.allSongs.forEach(s => {
+        if (s.artistId === item.id) s.artist = newDisplayName;
+      });
+      artist.albums.forEach(alb => {
+        alb.artist = newDisplayName;
+        alb.songs.forEach(s => s.artist = newDisplayName);
+      });
+      artist.songs.forEach(s => s.artist = newDisplayName);
+    }
+
+  } else if (type === 'album') {
+    // Find album across all artists
+    for (const artist of State.library.artists) {
+      const album = artist.albums.find(a => a.id === item.id);
+      if (album) {
+        album.name = newDisplayName;
+        album.songs.forEach(s => s.album = newDisplayName);
+        State.library.allSongs.forEach(s => {
+          if (s.albumId === item.id) s.album = newDisplayName;
+        });
+        break;
+      }
+    }
+
+  } else if (type === 'song') {
+    // Update song in allSongs and inside artist/album
+    const song = State.library.allSongs.find(s => s.id === item.id);
+    if (song) {
+      song.name     = newDisplayName;
+      song.fileName = newDriveName;
+    }
+    // Also update inside artist.songs / album.songs
+    for (const artist of State.library.artists) {
+      const inArtist = artist.songs.find(s => s.id === item.id);
+      if (inArtist) { inArtist.name = newDisplayName; inArtist.fileName = newDriveName; }
+      for (const album of artist.albums) {
+        const inAlbum = album.songs.find(s => s.id === item.id);
+        if (inAlbum) { inAlbum.name = newDisplayName; inAlbum.fileName = newDriveName; }
+      }
+    }
+    // Update currently playing song if it's this one
+    if (State.currentSong && State.currentSong.id === item.id) {
+      State.currentSong.name     = newDisplayName;
+      State.currentSong.fileName = newDriveName;
+      document.getElementById('player-track-name').textContent = newDisplayName;
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  CLEAN NAMES ENGINE
+//  Detects artist/album prefix in album and song names,
+//  looks up canonical names on MusicBrainz, proposes renames,
+//  shows a review screen, then applies to Drive + IndexedDB.
+// ════════════════════════════════════════════════════════════════
+
+// Pending changes list: [{type, item, oldName, newName, driveId, driveName}]
+const CleanNames = { pending: [] };
+
+// ── helpers ──────────────────────────────────────────────────
+function normalise(s) {
+  return s.toLowerCase()
+    .replace(/[''`´]/g, "'")
+    .replace(/[""]/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Does haystack contain needle as a meaningful prefix/suffix token?
+function containsToken(haystack, needle) {
+  if (!needle || needle.length < 2) return false;
+  const h = normalise(haystack);
+  const n = normalise(needle);
+  if (h === n) return false; // exact match = self-titled, keep
+  // Check as leading token (e.g. "Artist - Album", "Artist: Album", "Artist Album")
+  const escaped = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(
+    '(^' + escaped + '[\\s\\-–—_:,.|]+|[\\s\\-–—_:,.|]+' + escaped + '$)',
+    'i'
+  );
+  return re.test(h);
+}
+
+// Remove needle tokens from the start/end of str
+function removeToken(str, needle) {
+  if (!needle || needle.length < 2) return str;
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let result = str
+    .replace(new RegExp('^' + escaped + '[\\s\\-–—_:,.|]+', 'i'), '')
+    .replace(new RegExp('[\\s\\-–—_:,.|]+' + escaped + '$', 'i'), '')
+    .trim();
+  return result || str; // safety: never return empty
+}
+
+// Fetch canonical album name + metadata from MusicBrainz
+// Returns { title, artist, score } or null
+async function mbCanonicalAlbum(artistName, rawAlbumName) {
+  try {
+    const q = encodeURIComponent(`release:"${rawAlbumName}" AND artist:"${artistName}"`);
+    const url = `https://musicbrainz.org/ws/2/release/?query=${q}&limit=5&fmt=json`;
+    const resp = await fetch(url, { headers: { 'User-Agent': CONFIG.MB_USER_AGENT } });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const releases = data.releases || [];
+    if (!releases.length) return null;
+    releases.sort((a, b) => (b.score || 0) - (a.score || 0));
+    const best = releases[0];
+    // Only accept high-confidence matches (score >= 85)
+    if ((best.score || 0) < 85) return null;
+    const matchArtist = (best['artist-credit'] || []).map(ac => ac.name || '').join('');
+    return {
+      title:       best.title || null,
+      artist:      matchArtist || artistName,
+      score:       best.score || 0,
+      source:      'MusicBrainz',
+    };
+  } catch { return null; }
+}
+
+// Fetch canonical track/song name + metadata from MusicBrainz
+// Returns { title, artist, album, score } or null
+async function mbCanonicalTrack(artistName, albumName, rawTrackName) {
+  try {
+    let q;
+    if (albumName) {
+      q = encodeURIComponent(`recording:"${rawTrackName}" AND artist:"${artistName}" AND release:"${albumName}"`);
+    } else {
+      q = encodeURIComponent(`recording:"${rawTrackName}" AND artist:"${artistName}"`);
+    }
+    const url = `https://musicbrainz.org/ws/2/recording/?query=${q}&limit=5&fmt=json`;
+    const resp = await fetch(url, { headers: { 'User-Agent': CONFIG.MB_USER_AGENT } });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const recs = data.recordings || [];
+    if (!recs.length) return null;
+    recs.sort((a, b) => (b.score || 0) - (a.score || 0));
+    const best = recs[0];
+    // Only accept high-confidence matches (score >= 80)
+    if ((best.score || 0) < 80) return null;
+    const matchArtist = (best['artist-credit'] || []).map(ac => ac.name || '').join('');
+    const matchAlbum  = best.releases && best.releases[0] ? best.releases[0].title : '';
+    return {
+      title:      best.title || null,
+      artist:     matchArtist || artistName,
+      album:      matchAlbum  || albumName,
+      score:      best.score  || 0,
+      source:     'MusicBrainz',
+    };
+  } catch { return null; }
+}
+
+// ── main scan function ────────────────────────────────────────
+async function runCleanNamesScan() {
+  if (!State.library) { showToast('Library not loaded'); return; }
+  if (State.cleanRunning) { showToast('Scan already in progress…'); return; }
+
+  // Record which screen was showing so we can restore it after
+  const prevScreen = document.querySelector('.screen.active')?.id || 'library-screen';
+  CleanNames._prevScreen = prevScreen;
+
+  // Show the fixed overlay — does NOT affect .screen elements
+  State.cleanRunning = true;
+  const cleanEl = document.getElementById('clean-screen');
+  cleanEl.style.display = 'flex';
+  document.getElementById('clean-done-msg').style.display = 'none';
+
+  const labelEl  = document.getElementById('clean-label');
+  const detailEl = document.getElementById('clean-detail');
+  const countEl  = document.getElementById('clean-count');
+  const barEl    = document.getElementById('clean-bar');
+  const statsEl  = document.getElementById('clean-stats');
+
+  CleanNames.pending = [];
+  let processed = 0;
+  let renamed = 0;
+
+  const allArtists = State.library.artists;
+  // Total work units: albums + all songs
+  const totalAlbums = allArtists.reduce((s, a) => s + a.albums.length, 0);
+  const totalSongs  = State.library.allSongs.length;
+  const total       = totalAlbums + totalSongs;
+
+  function updateBar() {
+    barEl.style.width = total > 0 ? Math.round((processed / total) * 100) + '%' : '0%';
+    countEl.textContent = processed;
+    statsEl.textContent = `${renamed} rename${renamed !== 1 ? 's' : ''} found so far`;
+  }
+
+  // ── PASS 1: Albums ──────────────────────────────────────────
+  labelEl.textContent = 'Checking album names…';
+  for (const artist of allArtists) {
+    for (const album of artist.albums) {
+      detailEl.textContent = `${artist.name} / ${album.name}`;
+      await sleep(250); // MusicBrainz rate limit
+
+      let proposedName = album.name;
+      let changed = false;
+
+      // Step 1: local heuristic — does the album name contain the artist name?
+      if (containsToken(album.name, artist.name)) {
+        proposedName = removeToken(proposedName, artist.name).trim();
+        changed = true;
+      }
+
+      // Step 2: verify with MusicBrainz — returns rich metadata object or null
+      const canonical = await mbCanonicalAlbum(artist.name, album.name);
+      let matchArtist = '', matchSource = '';
+      if (canonical && canonical.title) {
+        const mbTitle = canonical.title.trim();
+        matchArtist = canonical.artist || '';
+        matchSource = canonical.source || 'MusicBrainz';
+        // Use MB title if it differs from current name
+        if (mbTitle && normalise(mbTitle) !== normalise(album.name)) {
+          proposedName = mbTitle;
+          changed = true;
+        } else if (canonical && changed) {
+          // MB confirms the album exists — trust heuristic clean
+        }
+      } else if (!canonical && changed) {
+        // No high-confidence MB match — be conservative, don't change
+        proposedName = album.name;
+        changed = false;
+      }
+
+      // Step 3: never leave empty, and skip if self-titled album (album === artist)
+      if (!proposedName || normalise(proposedName) === normalise(artist.name)) {
+        proposedName = album.name;
+        changed = false;
+      }
+
+      if (changed && normalise(proposedName) !== normalise(album.name)) {
+        CleanNames.pending.push({
+          type:        'album',
+          item:        album,
+          artist:      artist,
+          oldName:     album.name,
+          newName:     proposedName,
+          driveId:     album.id,
+          driveName:   proposedName,
+          matchArtist: matchArtist,
+          source:      matchSource,
+        });
+        renamed++;
+      }
+
+      processed++;
+      updateBar();
+    }
+  }
+
+  // ── PASS 2: Songs ───────────────────────────────────────────
+  labelEl.textContent = 'Checking song names…';
+  for (const song of State.library.allSongs) {
+    detailEl.textContent = song.name;
+    await sleep(200);
+
+    let proposedName = song.name;
+    let changed = false;
+
+    // Step A: strip embedded track numbers from display name
+    // e.g. "01 - Song Title", "02. Song Title", "Track 03 Song Title"
+    const trackNumRe = /^(\d{1,3}[\s.\-_]+|track\s*\d+[\s.\-_]*)/i;
+    if (trackNumRe.test(proposedName)) {
+      proposedName = proposedName.replace(trackNumRe, '').trim();
+      changed = true;
+    }
+
+    // Step B: strip standalone 4-digit years that look like release years
+    // e.g. "Song Title (2019)", "Song Title - 2019", "[2019] Song Title"
+    const yearRe = /[\s\-_([\[]*(19|20)\d{2}[\s\-_)\].]*/g;
+    const noYear = proposedName.replace(yearRe, ' ').replace(/\s{2,}/g,' ').trim();
+    if (noYear && noYear !== proposedName && noYear.length > 2) {
+      proposedName = noYear;
+      changed = true;
+    }
+
+    // Step C: remove artist name if present
+    if (song.artist && containsToken(proposedName, song.artist)) {
+      proposedName = removeToken(proposedName, song.artist).trim();
+      changed = true;
+    }
+    // Step D: remove album name if present
+    if (song.album && containsToken(proposedName, song.album)) {
+      proposedName = removeToken(proposedName, song.album).trim();
+      changed = true;
+    }
+
+    // Step E: Online verification via MusicBrainz (rich metadata)
+    await sleep(180);
+    let canonical = await mbCanonicalTrack(song.artist, song.album, proposedName);
+    if (!canonical && changed) {
+      // Try with original name if cleaned name yields no result
+      canonical = await mbCanonicalTrack(song.artist, song.album, song.name);
+    }
+    let matchArtist = '', matchAlbum = '', matchSource = '';
+    if (canonical && canonical.title) {
+      const mbClean = canonical.title.trim();
+      matchArtist = canonical.artist || '';
+      matchAlbum  = canonical.album  || '';
+      matchSource = canonical.source || 'MusicBrainz';
+      // Only accept if MB title differs from the ORIGINAL name (not the mid-cleaned one)
+      if (mbClean && normalise(mbClean) !== normalise(song.name) && mbClean.length > 1) {
+        proposedName = mbClean;
+        changed = true;
+      }
+    } else if (!canonical && changed && !containsToken(song.name, song.artist) && !containsToken(song.name, song.album)) {
+      // No MB match and heuristic only removed a track number/year — that's still valid
+      // But if no MB hit AND we only found numbers to strip, be conservative
+      const hadOnlyNumberStrip = !/[a-zA-Z]/.test(song.name.replace(proposedName, '').replace(/[\s\d.\-_()\[\]]/g, ''));
+      if (!hadOnlyNumberStrip) {
+        proposedName = song.name;
+        changed = false;
+      }
+    }
+
+    // Safety: never leave blank
+    if (!proposedName || proposedName.length < 1) {
+      proposedName = song.name;
+      changed = false;
+    }
+
+    if (changed && normalise(proposedName) !== normalise(song.name)) {
+      const extMatch = (song.fileName || '').match(/(\.[a-zA-Z0-9]+)$/);
+      const ext = extMatch ? extMatch[1] : '';
+      const driveName = proposedName + ext;
+
+      CleanNames.pending.push({
+        type:        'song',
+        item:        song,
+        oldName:     song.name,
+        newName:     proposedName,
+        driveId:     song.id,
+        driveName:   driveName,
+        matchArtist: matchArtist,
+        matchAlbum:  matchAlbum,
+        source:      matchSource,
+      });
+      renamed++;
+    }
+
+    processed++;
+    updateBar();
+  }
+
+  labelEl.textContent = 'Scan complete';
+  detailEl.textContent = '';
+
+  if (!CleanNames.pending.length) {
+    // Show the done message inside the overlay, then auto-dismiss
+    document.getElementById('clean-done-msg').style.display = 'block';
+    document.getElementById('clean-done-detail').textContent = 'All names are already clean — nothing to change.';
+    document.getElementById('clean-label').textContent = '';
+    document.querySelector('#clean-screen .scan-ring').style.display = 'none';
+    document.querySelector('#clean-screen .scan-progress').style.display = 'none';
+    setTimeout(() => {
+      document.getElementById('clean-screen').style.display = 'none';
+      document.querySelector('#clean-screen .scan-ring').style.display = '';
+      document.querySelector('#clean-screen .scan-progress').style.display = '';
+      State.cleanRunning = false;
+      showScreen(CleanNames._prevScreen || 'library-screen');
+    }, 2800);
+    return;
+  }
+
+  // Show review panel — overlay stays behind it
+  showCleanResultPanel(CleanNames._prevScreen);
+}
+
+// ── Review panel ──────────────────────────────────────────────
+// Track which items are selected (all checked by default)
+CleanNames.selected = new Set();
+
+function crpUpdateSelectAllState() {
+  const total    = CleanNames.pending.length;
+  const selCount = CleanNames.selected.size;
+  const allCb    = document.getElementById('crp-select-all-cb');
+  const countEl  = document.getElementById('crp-select-count');
+  if (!allCb) return;
+  if (selCount === 0) {
+    allCb.classList.remove('checked');
+  } else {
+    allCb.classList.add('checked');
+  }
+  // Indeterminate state indicator (partial)
+  allCb.style.opacity = (selCount > 0 && selCount < total) ? '0.6' : '1';
+  if (countEl) countEl.textContent = `${selCount} of ${total} selected`;
+  document.getElementById('crp-apply-btn').disabled = selCount === 0;
+}
+
+function showCleanResultPanel(prevScreen) {
+  const list    = document.getElementById('crp-list');
+  const summary = document.getElementById('crp-summary');
+  const panel   = document.getElementById('clean-result-panel');
+
+  const albumChanges = CleanNames.pending.filter(p => p.type === 'album').length;
+  const songChanges  = CleanNames.pending.filter(p => p.type === 'song').length;
+  summary.textContent = `${CleanNames.pending.length} rename${CleanNames.pending.length !== 1 ? 's' : ''} proposed — ${albumChanges} album${albumChanges !== 1 ? 's' : ''}, ${songChanges} song${songChanges !== 1 ? 's' : ''}`;
+
+  // All items selected by default
+  CleanNames.selected = new Set(CleanNames.pending.map((_, i) => i));
+
+  // Select-all header row
+  const selectAllHtml = `<div class="crp-select-all-row">
+    <div class="crp-cb checked" id="crp-select-all-cb">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <polyline points="1.5,6 4.5,9 10.5,3" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="crp-select-all-label">Select / Deselect All</span>
+    <span class="crp-select-all-count" id="crp-select-count">${CleanNames.pending.length} of ${CleanNames.pending.length} selected</span>
+  </div>`;
+
+  const itemsHtml = CleanNames.pending.map((p, i) => {
+    const sourceNote = p.source ? `<div class="crp-item-source">Source: ${esc(p.source)}</div>` : '';
+    const artistNote = p.type === 'album' && p.artist ? `<div class="crp-item-source">${esc(p.artist.name)}</div>` : '';
+    const matchNote  = p.matchArtist ? `<div class="crp-item-source">Matched: ${esc(p.matchArtist)}${p.matchAlbum ? ' · ' + esc(p.matchAlbum) : ''}</div>` : '';
+    return `<div class="crp-item" data-idx="${i}">
+      <div class="crp-cb-wrap">
+        <div class="crp-cb checked" data-cb="${i}">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <polyline points="1.5,6 4.5,9 10.5,3" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="crp-item-body">
+        <div class="crp-item-type">${p.type === 'album' ? '💿 Album' : '🎵 Song'}</div>
+        <div class="crp-item-old">${esc(p.oldName)}</div>
+        <div class="crp-item-new">→ ${esc(p.newName)}</div>
+        ${matchNote}${artistNote}${sourceNote}
+      </div>
+    </div>`;
+  }).join('');
+
+  list.innerHTML = selectAllHtml + itemsHtml;
+
+  // Wire select-all checkbox
+  document.getElementById('crp-select-all-cb').addEventListener('click', () => {
+    if (CleanNames.selected.size === CleanNames.pending.length) {
+      CleanNames.selected.clear();
+    } else {
+      CleanNames.selected = new Set(CleanNames.pending.map((_, i) => i));
+    }
+    // Update all item checkboxes
+    list.querySelectorAll('[data-cb]').forEach(cb => {
+      const idx = parseInt(cb.dataset.cb);
+      const checked = CleanNames.selected.has(idx);
+      cb.classList.toggle('checked', checked);
+      cb.closest('.crp-item').classList.toggle('deselected', !checked);
+    });
+    crpUpdateSelectAllState();
+  });
+
+  // Wire individual checkboxes
+  list.querySelectorAll('[data-cb]').forEach(cb => {
+    cb.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = parseInt(cb.dataset.cb);
+      if (CleanNames.selected.has(idx)) {
+        CleanNames.selected.delete(idx);
+        cb.classList.remove('checked');
+        cb.closest('.crp-item').classList.add('deselected');
+      } else {
+        CleanNames.selected.add(idx);
+        cb.classList.add('checked');
+        cb.closest('.crp-item').classList.remove('deselected');
+      }
+      crpUpdateSelectAllState();
+    });
+  });
+
+  panel.classList.add('active');
+  CleanNames._prevScreen = prevScreen;
+}
+
+// ── Apply selected renames ────────────────────────────────────
+async function applyCleanNames() {
+  const applyBtn = document.getElementById('crp-apply-btn');
+  const summary  = document.getElementById('crp-summary');
+  applyBtn.disabled = true;
+  applyBtn.textContent = 'Applying…';
+
+  let done = 0, failed = 0, skipped = 0;
+  const crpList = document.getElementById('crp-list');
+
+  for (let i = 0; i < CleanNames.pending.length; i++) {
+    const p = CleanNames.pending[i];
+    const rowEl = crpList.querySelector(`[data-idx="${i}"]`);
+
+    // Skip deselected items
+    if (!CleanNames.selected || !CleanNames.selected.has(i)) {
+      skipped++;
+      if (rowEl) rowEl.style.opacity = '0.25';
+      continue;
+    }
+
+    if (rowEl) rowEl.style.opacity = '0.6';
+
+    try {
+      // 1. Rename on Drive
+      await driveRename(p.driveId, p.driveName);
+      await sleep(150); // avoid rate limiting
+
+      // 2. Update in-memory library
+      applyRenameToLibrary(p.type, p.item, p.newName, p.driveName);
+
+      done++;
+      if (rowEl) {
+        rowEl.style.opacity = '1';
+        rowEl.querySelector('.crp-item-old').style.color = 'var(--text3)';
+        rowEl.querySelector('.crp-item-new').style.color = 'var(--accent)';
+      }
+    } catch(e) {
+      failed++;
+      if (rowEl) {
+        rowEl.innerHTML += `<div class="crp-item-error">Failed: ${esc(e.message)}</div>`;
+        rowEl.style.opacity = '1';
+      }
+    }
+
+      summary.textContent = `Applying… ${done + failed}/${CleanNames.selected ? CleanNames.selected.size : CleanNames.pending.length}`;
+  }
+
+  // 3. Save updated library to IndexedDB once
+  await dbSet('library', 'data', State.library);
+
+  const totalDone = done;
+  const totalFailed = failed;
+
+  summary.textContent = `Done — ${done} renamed${failed > 0 ? ', ' + failed + ' failed' : ''}${skipped > 0 ? ', ' + skipped + ' skipped' : ''}`;
+  applyBtn.textContent = 'Applied ✓';
+
+  // Hide review panel, show completion message in the overlay
+  setTimeout(() => {
+    document.getElementById('clean-result-panel').classList.remove('active');
+
+    // Show the done message
+    const doneMsg = document.getElementById('clean-done-msg');
+    const doneDtl = document.getElementById('clean-done-detail');
+    const cleanEl = document.getElementById('clean-screen');
+    document.getElementById('clean-label').textContent = '';
+    document.getElementById('clean-detail').textContent = '';
+    document.querySelector('#clean-screen .scan-ring').style.display = 'none';
+    document.querySelector('#clean-screen .scan-progress').style.display = 'none';
+    doneDtl.textContent = `${totalDone} file${totalDone !== 1 ? 's' : ''} renamed on Google Drive${totalFailed > 0 ? ' · ' + totalFailed + ' failed' : ''}.`;
+    doneMsg.style.display = 'block';
+    cleanEl.style.display = 'flex';
+
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      cleanEl.style.display = 'none';
+      document.querySelector('#clean-screen .scan-ring').style.display = '';
+      document.querySelector('#clean-screen .scan-progress').style.display = '';
+      doneMsg.style.display = 'none';
+      State.cleanRunning = false;
+      showLibrary();
+    }, 3000);
+  }, 600);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  LONG PRESS HELPER
+// ════════════════════════════════════════════════════════════════
+function attachLongPress(el, callback, delay = 550) {
+  let timer = null;
+  let moved = false;
+
+  function start(e) {
+    moved = false;
+    el.classList.add('longpress-active');
+    timer = setTimeout(() => {
+      if (!moved) {
+        el.classList.remove('longpress-active');
+        // Prevent the click event that follows touchend
+        el._suppressNextClick = true;
+        setTimeout(() => { el._suppressNextClick = false; }, 400);
+        callback();
+      }
+    }, delay);
+  }
+  function cancel() {
+    clearTimeout(timer);
+    el.classList.remove('longpress-active');
+  }
+  function move() { moved = true; cancel(); }
+
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('touchend',   cancel);
+  el.addEventListener('touchmove',  move,   { passive: true });
+  el.addEventListener('mousedown',  start);
+  el.addEventListener('mouseup',    cancel);
+  el.addEventListener('mousemove',  move);
+  // Suppress click after long press
+  el.addEventListener('click', e => { if (el._suppressNextClick) e.stopImmediatePropagation(); });
+}
+
+// Show orange dot on art elements that are missing artwork
+async function markMissingArt(elId, artKey) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const art = await dbGet('artwork', artKey).catch(() => null);
+  if (!art) {
+    // Only add if not already there
+    if (!el.querySelector('.no-art-dot')) {
+      const dot = document.createElement('div');
+      dot.className = 'no-art-dot';
+      el.style.position = 'relative';
+      el.appendChild(dot);
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  ARTWORK FIX MODAL EVENT WIRING
+// ════════════════════════════════════════════════════════════════
+// art-fix-search-btn removed — search triggers automatically on open
+
+document.getElementById('art-fix-save-btn').addEventListener('click', () => {
+  applySelectedArtwork();
+});
+
+document.getElementById('art-fix-cancel-btn').addEventListener('click', () => {
+  document.getElementById('artwork-fix-modal').classList.remove('active');
+});
+
+document.getElementById('artwork-fix-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('artwork-fix-modal')) {
+    document.getElementById('artwork-fix-modal').classList.remove('active');
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+//  ITEM CONTEXT MENU (long-press: rename or fix artwork)
+// ════════════════════════════════════════════════════════════════
+const CtxMenu = { type: null, item: null };
+
+function openItemContextMenu(type, item) {
+  CtxMenu.type = type;
+  CtxMenu.item = item;
+
+  const titleEl   = document.getElementById('ctx-menu-title');
+  const artworkBtn= document.getElementById('ctx-artwork-btn');
+  const renameSub = document.getElementById('ctx-rename-sub');
+
+  // Reset delete btn visibility
+  document.getElementById('ctx-delete-btn').style.display = 'none';
+
+  if (type === 'artist') {
+    titleEl.textContent = item.name;
+    artworkBtn.style.display = 'flex';
+    renameSub.textContent = 'Rename artist folder on Drive';
+  } else if (type === 'album') {
+    titleEl.textContent = item.name;
+    artworkBtn.style.display = 'flex';
+    renameSub.textContent = 'Rename album folder on Drive';
+  } else if (type === 'song') {
+    titleEl.textContent = item.name;
+    artworkBtn.style.display = 'none'; // songs don't have separate artwork fix
+    renameSub.textContent = 'Rename song file on Drive';
+    document.getElementById('ctx-delete-btn').style.display = 'flex';
+  }
+
+  document.getElementById('ctx-menu-modal').classList.add('active');
+}
+
+document.getElementById('ctx-rename-btn').addEventListener('click', () => {
+  document.getElementById('ctx-menu-modal').classList.remove('active');
+  openRenameModal(CtxMenu.type, CtxMenu.item);
+});
+
+document.getElementById('ctx-artwork-btn').addEventListener('click', () => {
+  document.getElementById('ctx-menu-modal').classList.remove('active');
+  openArtworkFixModal(CtxMenu.type, CtxMenu.item);
+});
+
+document.getElementById('ctx-delete-btn').addEventListener('click', () => {
+  document.getElementById('ctx-menu-modal').classList.remove('active');
+  if (CtxMenu.type === 'song' && CtxMenu.item) {
+    openDeleteConfirm(CtxMenu.item, 'single');
+  }
+});
+
+document.getElementById('ctx-cancel-btn').addEventListener('click', () => {
+  document.getElementById('ctx-menu-modal').classList.remove('active');
+});
+
+document.getElementById('ctx-menu-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('ctx-menu-modal')) {
+    document.getElementById('ctx-menu-modal').classList.remove('active');
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+//  RENAME MODAL EVENT WIRING
+// ════════════════════════════════════════════════════════════════
+document.getElementById('rename-save-btn').addEventListener('click', executeRename);
+
+document.getElementById('rename-cancel-btn').addEventListener('click', () => {
+  document.getElementById('rename-modal').classList.remove('active');
+});
+
+document.getElementById('rename-clear-btn').addEventListener('click', () => {
+  document.getElementById('rename-input').value = '';
+  document.getElementById('rename-input').focus();
+});
+
+document.getElementById('rename-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') executeRename();
+  if (e.key === 'Escape') document.getElementById('rename-modal').classList.remove('active');
+});
+
+document.getElementById('rename-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('rename-modal')) {
+    document.getElementById('rename-modal').classList.remove('active');
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+//  CLEAN NAMES EVENT WIRING
+// ════════════════════════════════════════════════════════════════
+document.getElementById('menu-clean-names').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  runCleanNamesScan();
+});
+
+document.getElementById('crp-apply-btn').addEventListener('click', () => {
+  applyCleanNames();
+});
+
+function dismissCleanUI() {
+  document.getElementById('clean-result-panel').classList.remove('active');
+  document.getElementById('clean-screen').style.display = 'none';
+  // Reset ring/progress visibility for next run
+  const ring = document.querySelector('#clean-screen .scan-ring');
+  const prog = document.querySelector('#clean-screen .scan-progress');
+  if (ring) ring.style.display = '';
+  if (prog) prog.style.display = '';
+  document.getElementById('clean-done-msg').style.display = 'none';
+  State.cleanRunning = false;
+  showScreen(CleanNames._prevScreen || 'library-screen');
+}
+
+document.getElementById('crp-cancel-btn').addEventListener('click', dismissCleanUI);
+document.getElementById('crp-close-btn').addEventListener('click', dismissCleanUI);
+
+// ════════════════════════════════════════════════════════════════
+//  INIT — clean single-path startup
+// ════════════════════════════════════════════════════════════════
+async function init() {
+  State.db = await openDB();
+
+  const favs = await dbGet('meta', 'favorites');
+  if (favs) State.favorites = new Set(favs);
+  updateFavBadge();
+
+  const savedPlayed = await dbGet('meta', 'playedIds');
+  if (savedPlayed && Array.isArray(savedPlayed)) State.playedIds = new Set(savedPlayed);
+
+  // ── If we have a valid stored token, go straight to the app ──
+  if (loadStoredToken()) {
+    await enterApp();
+    return;
+  }
+
+  // ── No stored token — show loading screen, attempt silent sign-in ──
+  showScreen('auth-screen');
+  showAuthLoading('Signing in…');
+
+  // Wait up to 7s for GIS library to finish loading, then try silent token
+  let waited = 0;
+  while (!_gisInitialized && waited < 7000) {
+    await new Promise(r => setTimeout(r, 200));
+    waited += 200;
+  }
+
+  if (!_gisInitialized) {
+    showAuthFallback('No connection. Tap to try again.');
+    return;
+  }
+
+  // Silent token request — no prompt shown if user already consented.
+  // onGisToken() callback will call enterApp() or showAuthFallback().
+  requestAccessToken(false);
+}
+
+// Called once we have a valid token
+async function enterApp() {
+  showScreen('scan-screen');
+  document.getElementById('scan-label').textContent = 'Loading your library…';
+
+  const cachedLib = await dbGet('library', 'data');
+  const isFirst   = await dbGet('meta', 'firstLaunch');
+  State.firstLaunch = isFirst !== false;
+
+  if (cachedLib && !State.firstLaunch) {
+    State.library = cachedLib;
+    showLibrary();
+  } else {
+    await scanLibrary();
+  }
+  // Push back-button sentinel now that we're inside the app
+  pushBackSentinel();
+}
+
+init().catch(e => {
+  console.error(e);
+  showAuthFallback('Error: ' + e.message);
+});
+</script>
+</body>
+</html>
