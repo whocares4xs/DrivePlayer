@@ -276,6 +276,17 @@
   }
   .ctrl-btn:active { transform:scale(0.88); }
   .ctrl-btn.active { color:var(--accent); }
+  /* Play mode button — stacked icon + tiny label */
+  .ctrl-playmode {
+    flex-direction:column; gap:1px; position:relative;
+    width:44px; height:44px;
+  }
+  .pm-label {
+    font-size:7px; font-weight:700; letter-spacing:0.4px;
+    text-transform:uppercase; line-height:1; color:inherit;
+    position:absolute; bottom:5px; left:50%; transform:translateX(-50%);
+    white-space:nowrap;
+  }
   .ctrl-play {
     width:64px; height:64px; border-radius:50%;
     background:var(--accent); border:none; cursor:pointer;
@@ -899,8 +910,11 @@
 
   <!-- Controls -->
   <div class="player-controls">
-    <button class="ctrl-btn" id="ctrl-repeat">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    <button class="ctrl-btn ctrl-playmode" id="ctrl-playmode" title="Play Mode">
+      <svg id="pm-icon-continuous" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      <svg id="pm-icon-loop-song" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/><text x="9" y="14" font-size="8" fill="currentColor" stroke="none" font-family="sans-serif" font-weight="bold">1</text></svg>
+      <svg id="pm-icon-loop-context" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      <svg id="pm-icon-once" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><line x1="18" y1="6" x2="6" y2="18" stroke-width="2.5"/><line x1="6" y1="6" x2="18" y2="18" stroke-width="2.5"/></svg>
     </button>
     <button class="ctrl-btn" id="ctrl-prev">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
@@ -1311,7 +1325,7 @@ const State = {
   isShuffleOn: false,
   playedIds: new Set(),   // smart shuffle history
   shuffleHistory: [],     // ordered history for prev track in shuffle
-  repeatMode: 0,          // 0=off 1=all 2=one
+  playMode: 'continuous', // 'continuous' | 'loop-song' | 'loop-context' | 'once'
   favorites: new Set(),
   currentSong: null,
   browseStack: [],        // navigation stack [{type:'artist',data}, {type:'album',data}]
@@ -2167,11 +2181,23 @@ function setupMediaSession(song, artSrc) {
 }
 
 Audio.addEventListener('ended', () => {
-  if (State.repeatMode === 2) {
-    Audio.currentTime = 0;
-    Audio.play().catch(() => {});
-  } else {
-    nextTrack();
+  switch (State.playMode) {
+    case 'loop-song':
+      // Replay current song immediately using cached blob for zero gap
+      Audio.currentTime = 0;
+      Audio.play().catch(() => {});
+      break;
+    case 'once':
+      // Stop — don't advance
+      State.isPlaying = false;
+      document.getElementById('play-icon').style.display = 'block';
+      document.getElementById('pause-icon').style.display = 'none';
+      break;
+    case 'continuous':
+    case 'loop-context':
+    default:
+      nextTrack();
+      break;
   }
 });
 
@@ -2211,26 +2237,55 @@ function formatTime(s) {
 }
 
 // ════════════════════════════════════════════════════════════════
-//  PRELOADER — downloads next song blob in background
+//  PRELOADER — zero-gap double-buffer system
+//  Audio2 is a hidden element that pre-fetches and pre-buffers
+//  the next song blob while the current one plays.
 // ════════════════════════════════════════════════════════════════
-const Preloader = {
-  cache: {},          // songId → blob URL
-  fetching: new Set(),
-  MAX: 4,
+const Audio2 = new window.Audio();
+Audio2.preload = 'auto';
 
+const Preloader = {
+  cache: {},           // songId → blobURL already fully downloaded
+  fetching: new Set(), // songIds currently being fetched
+  buffered: null,      // { songId, blobUrl } loaded into Audio2
+  MAX: 3,
+
+  // Download song and store in cache. Also pre-buffer into Audio2 if slot free.
   async prime(song) {
     if (!song) return;
     if (this.cache[song.id] || this.fetching.has(song.id)) return;
+    if (this.buffered && this.buffered.songId === song.id) return;
     this.fetching.add(song.id);
     try {
       const url = await getPlayableUrl(song.id);
       this.cache[song.id] = url;
       this._evict();
-    } catch(e) { /* silent fallback */ }
+      // Load into Audio2 for hardware buffering if not already occupied
+      if (!this.buffered || this.buffered.songId !== song.id) {
+        this._bufferIntoAudio2(song.id, url);
+      }
+    } catch(e) { /* silent */ }
     finally { this.fetching.delete(song.id); }
   },
 
+  _bufferIntoAudio2(songId, blobUrl) {
+    // Only buffer if Audio2 isn't already playing/buffering this song
+    if (this.buffered && this.buffered.songId === songId) return;
+    Audio2.src = blobUrl;
+    Audio2.load(); // triggers browser to buffer without playing
+    this.buffered = { songId, blobUrl };
+  },
+
+  // Return the blob URL for a song — from Audio2 buffer first, then cache
   consume(songId) {
+    // Prefer the pre-buffered Audio2 slot — it's already in hardware buffer
+    if (this.buffered && this.buffered.songId === songId) {
+      const url = this.buffered.blobUrl;
+      this.buffered = null;
+      Audio2.src = ''; // free Audio2
+      delete this.cache[songId]; // remove from cache too if present
+      return url;
+    }
     const url = this.cache[songId];
     delete this.cache[songId];
     return url || null;
@@ -2240,7 +2295,9 @@ const Preloader = {
     const keys = Object.keys(this.cache);
     if (keys.length > this.MAX) {
       keys.slice(0, keys.length - this.MAX).forEach(k => {
-        URL.revokeObjectURL(this.cache[k]);
+        if (!this.buffered || this.buffered.songId !== k) {
+          URL.revokeObjectURL(this.cache[k]);
+        }
         delete this.cache[k];
       });
     }
@@ -2250,43 +2307,45 @@ const Preloader = {
     Object.values(this.cache).forEach(u => URL.revokeObjectURL(u));
     this.cache = {};
     this.fetching.clear();
+    if (this.buffered) {
+      URL.revokeObjectURL(this.buffered.blobUrl);
+      this.buffered = null;
+      Audio2.src = '';
+    }
   }
 };
 
-// Determine which song comes next (respects shuffle) and preload it.
-// Called immediately when a song starts playing and again near the end.
+// Work out which song comes next without advancing state, prime it immediately.
 function primeNextSong() {
   if (!State.queue.length) return;
+  if (State.playMode === 'loop-song' || State.playMode === 'once') return; // no need
+
+  let nextSong = null;
 
   if (State.isShuffleOn) {
-    // Peek at what smart shuffle would pick — same logic as playSmartShuffleNext
-    // but without actually advancing state.
-    const queue = State.queue;
+    // Peek: build unplayed pool same way playSmartShuffleNext does
     const played = new Set(State.playedIds);
     if (State.currentSong) played.add(State.currentSong.id);
-    let unplayed = queue.filter(s => !played.has(s.id));
-    if (unplayed.length === 0) {
-      // All played — wrap: any song except current
-      unplayed = queue.filter(s => !State.currentSong || s.id !== State.currentSong.id);
-    }
-    if (unplayed.length === 0) return;
-    // Preload all remaining unplayed (up to MAX) so whichever random pick happens,
-    // there's a high chance it's already cached.
-    const toPrime = unplayed.slice(0, Preloader.MAX);
-    toPrime.forEach(s => Preloader.prime(s));
+    let unplayed = State.queue.filter(s => !played.has(s.id));
+    if (!unplayed.length) unplayed = State.queue.filter(s => !State.currentSong || s.id !== State.currentSong.id);
+    // Prime the first few candidates — whichever gets picked will likely be cached
+    unplayed.slice(0, Preloader.MAX).forEach(s => Preloader.prime(s));
+    if (unplayed.length) nextSong = unplayed[0]; // prime the most likely next into Audio2
   } else {
-    // Sequential — preload next 2 songs in queue
     const n1 = (State.queueIndex + 1) % State.queue.length;
+    nextSong = State.queue[n1];
+    // Also prime song after that
     const n2 = (State.queueIndex + 2) % State.queue.length;
-    Preloader.prime(State.queue[n1]);
     if (n2 !== n1) Preloader.prime(State.queue[n2]);
   }
+
+  if (nextSong) Preloader.prime(nextSong);
 }
 
-// Kick off preloading right when a song starts, and again near the end
+// Prime immediately when playback starts, and again with 30s to go
 Audio.addEventListener('playing', () => primeNextSong());
 Audio.addEventListener('timeupdate', () => {
-  if (Audio.duration && (Audio.duration - Audio.currentTime) < 45) primeNextSong();
+  if (Audio.duration && (Audio.duration - Audio.currentTime) < 30) primeNextSong();
 });
 
 // ════════════════════════════════════════════════════════════════
@@ -2321,12 +2380,12 @@ async function playSong(song, queue = null, idx = 0) {
       document.getElementById('play-icon').style.display = 'none';
       document.getElementById('pause-icon').style.display = 'block';
     } catch(e) { console.error(e); }
-    // Start preloading the next song right away
-    setTimeout(primeNextSong, 500);
+    // Prime next song immediately — no delay
+    primeNextSong();
     return;
   }
 
-  // Not preloaded — fetch on demand, then immediately prime next
+  // Not preloaded — fetch on demand
   document.getElementById('player-loading').classList.add('show');
   try {
     const blobUrl = await getPlayableUrl(song.id);
@@ -2336,12 +2395,11 @@ async function playSong(song, queue = null, idx = 0) {
     State.isPlaying = true;
     document.getElementById('play-icon').style.display = 'none';
     document.getElementById('pause-icon').style.display = 'block';
-    // Start preloading the next song immediately after this one starts
-    setTimeout(primeNextSong, 500);
+    // Start priming next song immediately — maximises buffering time
+    primeNextSong();
   } catch(e) {
     showToast('Could not load track — check connection');
     console.error(e);
-    // Try next track automatically on load failure
     setTimeout(() => nextTrack(), 1500);
   } finally {
     document.getElementById('player-loading').classList.remove('show');
@@ -2389,6 +2447,9 @@ async function updatePlayerUI(song) {
 
   // Update visualizer track info (if open)
   if (Viz.active) vizUpdateTrackInfo();
+
+  // Sync play-mode button icon
+  updatePlayModeBtn();
 }
 
 function playPause() {
@@ -2431,15 +2492,69 @@ function prevTrack() {
 
 function nextTrack() {
   if (State.queue.length === 0) return;
-  if (State.repeatMode === 2) { playSong(State.queue[State.queueIndex]); return; }
+
+  // loop-song: replay current
+  if (State.playMode === 'loop-song') {
+    playSong(State.queue[State.queueIndex]);
+    return;
+  }
 
   if (State.isShuffleOn) {
     playSmartShuffleNext();
     return;
   }
 
+  const atEnd = State.queueIndex >= State.queue.length - 1;
+
+  if (State.playMode === 'continuous' && atEnd) {
+    // Stop at the end of the queue
+    State.isPlaying = false;
+    document.getElementById('play-icon').style.display = 'block';
+    document.getElementById('pause-icon').style.display = 'none';
+    return;
+  }
+
+  // loop-context: wrap around; continuous: already handled above if at end
   State.queueIndex = (State.queueIndex + 1) % State.queue.length;
   playSong(State.queue[State.queueIndex]);
+}
+
+// Update the play-mode button icon and style
+function updatePlayModeBtn() {
+  const btn = document.getElementById('ctrl-playmode');
+  // Hide all icons
+  ['continuous','loop-song','loop-context','once'].forEach(m => {
+    const el = document.getElementById('pm-icon-' + m);
+    if (el) el.style.display = 'none';
+  });
+  // Show active icon
+  const activeIcon = document.getElementById('pm-icon-' + State.playMode);
+  if (activeIcon) activeIcon.style.display = 'block';
+
+  // Remove old label if any
+  const oldLabel = btn.querySelector('.pm-label');
+  if (oldLabel) oldLabel.remove();
+
+  // Add tiny label below icon
+  const labelMap = {
+    'continuous':   'CONT',
+    'loop-context': 'LOOP',
+    'loop-song':    '1×∞',
+    'once':         'ONCE',
+  };
+  const label = document.createElement('span');
+  label.className = 'pm-label';
+  label.textContent = labelMap[State.playMode] || '';
+  btn.appendChild(label);
+
+  // Colour: accent when any loop mode, dim when once, normal for continuous
+  if (State.playMode === 'once') {
+    btn.style.color = 'var(--text3)';
+  } else if (State.playMode === 'continuous') {
+    btn.style.color = 'var(--text2)';
+  } else {
+    btn.style.color = 'var(--accent)';
+  }
 }
 
 function playSmartShuffleNext() {
@@ -2896,11 +3011,16 @@ function attachSongRowListeners(container, songs, artKey) {
 
 function setupBrowseActions(songs, contextName) {
   document.getElementById('browse-play-btn').onclick = () => {
-    if (songs.length) playSong(songs[0], songs, 0);
+    if (songs.length) {
+      State.isShuffleOn = false;
+      State.playMode = 'continuous';
+      playSong(songs[0], songs, 0);
+    }
   };
   document.getElementById('browse-shuffle-btn').onclick = () => {
     if (songs.length) {
       State.isShuffleOn = true;
+      State.playMode = 'continuous';
       State.playedIds = new Set();
       State.shuffleHistory = [];
       savePlayedIds();
@@ -3086,6 +3206,7 @@ function startShuffleAll() {
   State.isShuffleOn = true;
   State.playedIds   = new Set();
   State.shuffleHistory = [];
+  State.playMode = 'continuous';
   savePlayedIds();
 
   // Mark first song played so smart shuffle won't repeat it immediately
@@ -4025,12 +4146,18 @@ document.getElementById('ctrl-play').addEventListener('click', playPause);
 document.getElementById('ctrl-prev').addEventListener('click', prevTrack);
 document.getElementById('ctrl-next').addEventListener('click', nextTrack);
 document.getElementById('ctrl-lib').addEventListener('click', showLibrary);
-document.getElementById('ctrl-repeat').addEventListener('click', () => {
-  State.repeatMode = (State.repeatMode + 1) % 3;
-  const btn = document.getElementById('ctrl-repeat');
-  btn.classList.toggle('active', State.repeatMode > 0);
-  const labels = ['Repeat Off', 'Repeat All', 'Repeat One'];
-  showToast(labels[State.repeatMode]);
+document.getElementById('ctrl-playmode').addEventListener('click', () => {
+  const modes = ['continuous', 'loop-context', 'loop-song', 'once'];
+  const cur = modes.indexOf(State.playMode);
+  State.playMode = modes[(cur + 1) % modes.length];
+  updatePlayModeBtn();
+  const labels = {
+    'continuous':   '▶ Continuous — plays all songs, stops at end',
+    'loop-context': '🔁 Loop All — repeats queue forever',
+    'loop-song':    '🔂 Loop Song — repeats this song',
+    'once':         '✕ Play Once — stops after this song',
+  };
+  showToast(labels[State.playMode]);
 });
 
 // Shuffle btn on player
@@ -4044,11 +4171,11 @@ document.getElementById('shuffle-folder-btn').addEventListener('click', () => {
   const songs = currentBrowseContext.length > 0 ? currentBrowseContext : (State.library ? State.library.allSongs : []);
   if (songs.length) {
     State.isShuffleOn = true;
+    State.playMode = 'continuous';
     State.playedIds = new Set();
     State.shuffleHistory = [];
     savePlayedIds();
     document.getElementById('player-shuffle-btn').classList.add('active');
-    // Don't pre-shuffle — pick first song randomly from raw pool
     const firstIdx = cryptoRandInt(songs.length);
     const firstSong = songs[firstIdx];
     State.playedIds.add(firstSong.id);
@@ -4061,6 +4188,7 @@ document.getElementById('shuffle-all-btn').addEventListener('click', () => {
   if (!State.library) return;
   const allSongs = State.library.allSongs;
   State.isShuffleOn = true;
+  State.playMode = 'continuous';
   State.playedIds = new Set();
   State.shuffleHistory = [];
   savePlayedIds();
