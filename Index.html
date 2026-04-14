@@ -108,6 +108,8 @@
     display:flex; align-items:center; gap:14px;
     padding:12px 20px; border-bottom:1px solid #111; cursor:pointer;
     transition:background 0.15s;
+    -webkit-user-select:none; user-select:none;
+    -webkit-touch-callout:none;
   }
   .lib-item:active { background:var(--surface2); }
   .lib-item-art {
@@ -161,6 +163,8 @@
     display:flex; align-items:center; gap:14px;
     padding:12px 20px; border-bottom:1px solid #111; cursor:pointer;
     transition:background 0.15s;
+    -webkit-user-select:none; user-select:none;
+    -webkit-touch-callout:none;
   }
   .browse-item:active { background:var(--surface2); }
   .browse-item-num { width:24px; text-align:center; font-size:13px; color:var(--text3); flex-shrink:0; }
@@ -431,13 +435,40 @@
   }
   .lib-shuffle-all-btn:active { transform: scale(0.95); }
 
+  /* ─── SONG SELECTION CHECKBOX ─── */
+  .song-cb-wrap {
+    width:32px; height:32px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    -webkit-user-select:none; user-select:none;
+    -webkit-touch-callout:none;
+  }
+  .song-cb {
+    width:22px; height:22px; border-radius:6px;
+    border:2px solid var(--border);
+    background:transparent;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color 0.15s, background 0.15s, transform 0.1s;
+    cursor:pointer;
+  }
+  .song-cb svg { display:none; }
+  .song-cb.checked {
+    border-color:var(--accent); background:var(--accent);
+    transform:scale(1.08);
+  }
+  .song-cb.checked svg { display:block; }
+  /* When not in select mode the checkbox is faint — becomes crisp when active */
+  .lib-item .song-cb { opacity:0.25; }
+  .selecting-mode .lib-item .song-cb { opacity:1; }
+  .lib-item.delete-selected { background:rgba(232,201,122,0.07); }
+
   /* ─── MULTI-DELETE SELECT MODE ─── */
-  .lib-item.delete-selected { background:rgba(224,85,85,0.12); }
   .delete-select-bar {
-    position:fixed; bottom:0; left:0; right:0; z-index:95;
-    background:rgba(224,85,85,0.95); backdrop-filter:blur(12px);
+    position:fixed; bottom:0; left:0; right:0; z-index:96;
+    background:rgba(180,40,40,0.97); backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
     display:none; align-items:center; gap:12px;
     padding:14px 20px calc(14px + var(--safe-bottom,0px));
+    border-top:1px solid rgba(255,255,255,0.15);
   }
   .delete-select-bar.active { display:flex; }
   .dsb-count { flex:1; font-size:14px; font-weight:600; color:#fff; }
@@ -445,7 +476,7 @@
     padding:9px 18px; border-radius:50px; border:none; cursor:pointer;
     font-size:13px; font-weight:700; font-family:'DM Sans',sans-serif;
   }
-  .dsb-delete { background:#fff; color:#e05555; }
+  .dsb-delete { background:#fff; color:#c0392b; }
   .dsb-cancel { background:rgba(255,255,255,0.2); color:#fff; }
 
   /* ─── SCROLLBARS ─── */
@@ -1332,44 +1363,85 @@ function dbSet(store, key, val) {
 
 let _gisTokenClient  = null;
 let _gisInitialized  = false;
-let _authInProgress  = false; // guard against double calls
+let _authInProgress  = false;
+let _tokenRefreshMode = false;  // true when refreshing mid-session
+let _tokenRefreshResolve = null;
+let _tokenRefreshTimer = null;
 
-// Safety no-op — One Tap div is removed but kept in case GIS fires it
-function gisOneTapCallback(response) { /* handled by token client below */ }
+// Safety no-op
+function gisOneTapCallback(response) {}
 
-// GIS library calls this when it finishes loading
 window.onGoogleLibraryLoad = function() {
   _gisTokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CONFIG.CLIENT_ID,
     scope:     CONFIG.SCOPES,
-    callback:  onGisToken,   // single, stable callback reference
+    callback:  onGisToken,
   });
   _gisInitialized = true;
 };
 
-// Single token callback — called by GIS after silent OR interactive sign-in
+// Handles both initial sign-in and silent mid-session refresh
 function onGisToken(resp) {
   _authInProgress = false;
   if (resp.error || !resp.access_token) {
-    // Silent sign-in failed → show manual button (user hasn't consented yet)
-    showAuthFallback('Tap below to sign in with Google');
+    if (_tokenRefreshMode) {
+      _tokenRefreshMode = false;
+      if (_tokenRefreshResolve) { _tokenRefreshResolve(false); _tokenRefreshResolve = null; }
+    } else {
+      showAuthFallback('Tap below to sign in with Google');
+    }
     return;
   }
-  // Store token in localStorage (survives page reloads)
   const expiresIn = parseInt(resp.expires_in || '3600');
   State.token       = resp.access_token;
   State.tokenExpiry = Date.now() + expiresIn * 1000 - 60000;
   localStorage.setItem('dp_token',  State.token);
   localStorage.setItem('dp_expiry', State.tokenExpiry);
-  // Go straight to the app — no second sign-in screen
-  enterApp();
+  scheduleTokenRefresh();
+  if (_tokenRefreshMode) {
+    _tokenRefreshMode = false;
+    if (_tokenRefreshResolve) { _tokenRefreshResolve(true); _tokenRefreshResolve = null; }
+  } else {
+    enterApp();
+  }
 }
 
-// Kick off a token request — silent by default, interactive if forced
 function requestAccessToken(forcePrompt) {
   if (!_gisTokenClient || _authInProgress) return;
   _authInProgress = true;
   _gisTokenClient.requestAccessToken({ prompt: forcePrompt ? 'select_account' : '' });
+}
+
+// Silent mid-session token refresh — returns Promise<boolean>
+function refreshTokenSilently() {
+  return new Promise((resolve) => {
+    if (!_gisInitialized || !_gisTokenClient) { resolve(false); return; }
+    if (_authInProgress) {
+      const wait = setInterval(() => {
+        if (!_authInProgress) { clearInterval(wait); resolve(!!State.token); }
+      }, 200);
+      setTimeout(() => { clearInterval(wait); resolve(false); }, 10000);
+      return;
+    }
+    _tokenRefreshMode = true;
+    _tokenRefreshResolve = resolve;
+    requestAccessToken(false);
+  });
+}
+
+// Schedule proactive refresh 5 min before expiry
+function scheduleTokenRefresh() {
+  if (_tokenRefreshTimer) clearTimeout(_tokenRefreshTimer);
+  const msUntilRefresh = Math.max(0, State.tokenExpiry - Date.now() - 5 * 60 * 1000);
+  _tokenRefreshTimer = setTimeout(async () => {
+    await refreshTokenSilently();
+  }, msUntilRefresh);
+}
+
+// Ensure valid token — refresh silently if expired or about to expire
+async function ensureValidToken() {
+  if (State.token && State.tokenExpiry > Date.now() + 30000) return true;
+  return await refreshTokenSilently();
 }
 
 // Load a still-valid token from localStorage
@@ -1379,6 +1451,7 @@ function loadStoredToken() {
   if (token && expiry > Date.now()) {
     State.token       = token;
     State.tokenExpiry = expiry;
+    scheduleTokenRefresh();
     return true;
   }
   return false;
@@ -1416,10 +1489,20 @@ document.getElementById('sign-in-btn').addEventListener('click', () => {
 //  DRIVE API HELPERS
 // ════════════════════════════════════════════════════════════════
 async function driveRequest(url, opts = {}) {
-  const resp = await fetch(url, {
+  let resp = await fetch(url, {
     ...opts,
     headers: { Authorization: `Bearer ${State.token}`, ...(opts.headers || {}) }
   });
+  if (resp.status === 401) {
+    // Token expired — refresh silently and retry once
+    const ok = await refreshTokenSilently();
+    if (ok) {
+      resp = await fetch(url, {
+        ...opts,
+        headers: { Authorization: `Bearer ${State.token}`, ...(opts.headers || {}) }
+      });
+    }
+  }
   if (!resp.ok) throw new Error(`Drive API error: ${resp.status}`);
   return resp.json();
 }
@@ -1427,6 +1510,7 @@ async function driveRequest(url, opts = {}) {
 // Rename a Drive file or folder (requires drive scope)
 // Delete a Drive file (moves to trash — recoverable from Drive web UI)
 async function driveDelete(fileId) {
+  await ensureValidToken();
   const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/trash`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${State.token}` },
@@ -1438,6 +1522,7 @@ async function driveDelete(fileId) {
 }
 
 async function driveRename(fileId, newName) {
+  await ensureValidToken();
   const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
     method: 'PATCH',
     headers: {
@@ -1486,6 +1571,7 @@ function isImageFile(name) {
 // Fetch a Drive image file and return it as a base64 data URL
 async function fetchDriveImageAsBase64(fileId) {
   try {
+    await ensureValidToken();
     const resp = await fetch(
       `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
       { headers: { Authorization: `Bearer ${State.token}` } }
@@ -1505,10 +1591,21 @@ function getStreamUrl(fileId) {
 }
 
 // Fetch audio as blob and return object URL for playback
+// Retries once after a silent token refresh on 401
 async function getPlayableUrl(fileId) {
-  const resp = await fetch(getStreamUrl(fileId), {
+  await ensureValidToken();
+  let resp = await fetch(getStreamUrl(fileId), {
     headers: { Authorization: `Bearer ${State.token}` }
   });
+  if (resp.status === 401) {
+    // Token was stale even after ensureValidToken — force refresh and retry
+    const ok = await refreshTokenSilently();
+    if (ok) {
+      resp = await fetch(getStreamUrl(fileId), {
+        headers: { Authorization: `Bearer ${State.token}` }
+      });
+    }
+  }
   if (!resp.ok) throw new Error(`Stream error: ${resp.status}`);
   const blob = await resp.blob();
   return URL.createObjectURL(blob);
@@ -2432,6 +2529,8 @@ function showLibrary() {
 }
 
 function renderLibraryTab(tab) {
+  // Exit delete-select mode if switching tabs
+  if (DeleteState.selecting && tab !== State.currentTab) exitDeleteSelect();
   State.currentTab = tab;
   document.querySelectorAll('.lib-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   const list = document.getElementById('lib-list');
@@ -2517,7 +2616,15 @@ function renderLibraryTab(tab) {
     for (let i = 0; i < songs.length; i++) {
       const s = songs[i];
       const isFav = State.favorites.has(s.id);
-      html += `<div class="lib-item" data-song-idx="${i}">
+      const isChk = DeleteState.selecting && DeleteState.selected.has(s.id);
+      html += `<div class="lib-item${isChk ? ' delete-selected' : ''}" data-song-idx="${i}" data-song-id="${s.id}">
+        <div class="song-cb-wrap" data-cb-song-id="${s.id}">
+          <div class="song-cb${isChk ? ' checked' : ''}">
+            <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
+              <polyline points="1.5,6 4.5,9 10.5,3" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
         <div class="lib-item-art" id="art-song-${i}">🎵</div>
         <div class="lib-item-info">
           <div class="lib-item-name">${esc(s.name)}</div>
@@ -2530,27 +2637,37 @@ function renderLibraryTab(tab) {
     }
     list.innerHTML = html;
     for (let i = 0; i < songs.length; i++) loadArtIntoEl(`art-song-${i}`, songs[i].artKey);
-    list.querySelectorAll('.lib-item').forEach(el => {
-      const idx = parseInt(el.dataset.songIdx);
-      attachLongPress(el, () => {
+
+    // Wire checkboxes: long press → enter select mode + check; single tap → toggle (if in mode)
+    list.querySelectorAll('.song-cb-wrap').forEach(cbWrap => {
+      const songId = cbWrap.dataset.cbSongId;
+      const rowEl  = cbWrap.closest('.lib-item');
+      const cbEl   = cbWrap.querySelector('.song-cb');
+      attachLongPress(cbWrap, () => {
+        if (!DeleteState.selecting) enterDeleteSelect();
+        toggleDeleteSelect(songId, rowEl, cbEl);
+      });
+      cbWrap.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (DeleteState.selecting) {
-          el.classList.toggle('delete-selected', DeleteState.selected.has(songs[idx].id));
-          toggleDeleteSelect(songs[idx].id, el);
+          toggleDeleteSelect(songId, rowEl, cbEl);
         } else {
-          // Enter multi-select mode, select this song
+          // First tap on checkbox — enter select mode and check it
           enterDeleteSelect();
-          toggleDeleteSelect(songs[idx].id, el);
+          toggleDeleteSelect(songId, rowEl, cbEl);
         }
       });
+    });
+
+    // Row tap → play (never selects)
+    list.querySelectorAll('.lib-item').forEach(el => {
       el.addEventListener('click', (e) => {
-        if (e.target.closest('.browse-item-fav')) return;
-        if (DeleteState.selecting) {
-          toggleDeleteSelect(songs[idx].id, el);
-          return;
-        }
+        if (e.target.closest('.song-cb-wrap') || e.target.closest('.browse-item-fav')) return;
+        const idx = parseInt(el.dataset.songIdx);
         playSong(songs[idx], songs, idx);
       });
     });
+
     list.querySelectorAll('.browse-item-fav').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2568,7 +2685,15 @@ function renderLibraryTab(tab) {
     let html = '';
     for (let i = 0; i < favSongs.length; i++) {
       const s = favSongs[i];
-      html += `<div class="lib-item" data-fav-idx="${i}">
+      const isChk = DeleteState.selecting && DeleteState.selected.has(s.id);
+      html += `<div class="lib-item${isChk ? ' delete-selected' : ''}" data-fav-idx="${i}" data-song-id="${s.id}">
+        <div class="song-cb-wrap" data-cb-song-id="${s.id}">
+          <div class="song-cb${isChk ? ' checked' : ''}">
+            <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
+              <polyline points="1.5,6 4.5,9 10.5,3" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
         <div class="lib-item-art" id="art-fav-${i}">🎵</div>
         <div class="lib-item-info">
           <div class="lib-item-name">${esc(s.name)}</div>
@@ -2581,13 +2706,34 @@ function renderLibraryTab(tab) {
     }
     list.innerHTML = html;
     for (let i = 0; i < favSongs.length; i++) loadArtIntoEl(`art-fav-${i}`, favSongs[i].artKey);
+
+    list.querySelectorAll('.song-cb-wrap').forEach(cbWrap => {
+      const songId = cbWrap.dataset.cbSongId;
+      const rowEl  = cbWrap.closest('.lib-item');
+      const cbEl   = cbWrap.querySelector('.song-cb');
+      attachLongPress(cbWrap, () => {
+        if (!DeleteState.selecting) enterDeleteSelect();
+        toggleDeleteSelect(songId, rowEl, cbEl);
+      });
+      cbWrap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (DeleteState.selecting) {
+          toggleDeleteSelect(songId, rowEl, cbEl);
+        } else {
+          enterDeleteSelect();
+          toggleDeleteSelect(songId, rowEl, cbEl);
+        }
+      });
+    });
+
     list.querySelectorAll('.lib-item').forEach(el => {
       el.addEventListener('click', (e) => {
-        if (e.target.closest('.browse-item-fav')) return;
+        if (e.target.closest('.song-cb-wrap') || e.target.closest('.browse-item-fav')) return;
         const idx = parseInt(el.dataset.favIdx);
         playSong(favSongs[idx], favSongs, idx);
       });
     });
+
     list.querySelectorAll('.browse-item-fav').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2731,20 +2877,11 @@ function attachSongRowListeners(container, songs, artKey) {
   container.querySelectorAll('[data-song-idx]').forEach(el => {
     const idx = parseInt(el.dataset.songIdx);
     attachLongPress(el, () => {
-      // Long press: if already in select mode just toggle; else open context menu
-      if (DeleteState.selecting) {
-        toggleDeleteSelect(songs[idx].id, el);
-      } else {
-        openItemContextMenu('song', songs[idx]);
-      }
+      // Long press in browse view: open context menu (rename/delete)
+      openItemContextMenu('song', songs[idx]);
     });
     el.addEventListener('click', e => {
       if (e.target.closest('.browse-item-fav')) return;
-      if (DeleteState.selecting) {
-        // In select mode: tap toggles selection
-        toggleDeleteSelect(songs[idx].id, el);
-        return;
-      }
       playSong(songs[idx], songs, idx);
     });
   });
@@ -3553,6 +3690,7 @@ function enterDeleteSelect() {
   DeleteState.selecting = true;
   DeleteState.selected  = new Set();
   document.getElementById('delete-select-bar').classList.add('active');
+  document.getElementById('lib-list').classList.add('selecting-mode');
   updateDeleteBar();
 }
 
@@ -3560,25 +3698,29 @@ function exitDeleteSelect() {
   DeleteState.selecting = false;
   DeleteState.selected  = new Set();
   document.getElementById('delete-select-bar').classList.remove('active');
-  // Remove selection highlight from all items
+  document.getElementById('lib-list').classList.remove('selecting-mode');
   document.querySelectorAll('.lib-item.delete-selected, .browse-item.delete-selected')
     .forEach(el => el.classList.remove('delete-selected'));
+  document.querySelectorAll('.song-cb.checked')
+    .forEach(cb => cb.classList.remove('checked'));
 }
 
 function updateDeleteBar() {
   const count = DeleteState.selected.size;
   document.getElementById('dsb-count').textContent =
-    count === 0 ? 'Tap songs to select' : `${count} song${count !== 1 ? 's' : ''} selected`;
+    count === 0 ? 'Tap checkboxes to select songs' : `${count} song${count !== 1 ? 's' : ''} selected`;
   document.getElementById('dsb-delete-btn').disabled = count === 0;
 }
 
-function toggleDeleteSelect(songId, el) {
+function toggleDeleteSelect(songId, rowEl, cbEl) {
   if (DeleteState.selected.has(songId)) {
     DeleteState.selected.delete(songId);
-    el && el.classList.remove('delete-selected');
+    rowEl && rowEl.classList.remove('delete-selected');
+    cbEl  && cbEl.classList.remove('checked');
   } else {
     DeleteState.selected.add(songId);
-    el && el.classList.add('delete-selected');
+    rowEl && rowEl.classList.add('delete-selected');
+    cbEl  && cbEl.classList.add('checked');
   }
   updateDeleteBar();
 }
@@ -3606,6 +3748,7 @@ document.getElementById('delete-modal').addEventListener('click', e => {
 // ── Multi-select bar buttons ─────────────────────────────────
 document.getElementById('dsb-cancel-btn').addEventListener('click', () => {
   exitDeleteSelect();
+  // Re-render to clear any visual selection state
   if (document.getElementById('library-screen').classList.contains('active')) {
     renderLibraryTab(State.currentTab);
   } else if (document.getElementById('browse-screen').classList.contains('active')) {
@@ -3797,22 +3940,34 @@ function pushBackSentinel() {
 }
 
 window.addEventListener('popstate', (event) => {
-  // If a modal is open, close it instead of doing anything else
-  const openModal = document.querySelector('.modal-overlay.active');
-  if (openModal) {
-    openModal.classList.remove('active');
-    pushBackSentinel(); // re-push so next back still works
+  // 1. If delete-select mode is active, cancel it (don't show logout)
+  if (DeleteState.selecting) {
+    exitDeleteSelect();
+    if (document.getElementById('library-screen').classList.contains('active')) {
+      renderLibraryTab(State.currentTab);
+    } else if (document.getElementById('browse-screen').classList.contains('active')) {
+      renderBrowse();
+    }
+    pushBackSentinel();
     return;
   }
 
-  // If visualizer is open, close it
+  // 2. If a modal is open, close it
+  const openModal = document.querySelector('.modal-overlay.active');
+  if (openModal) {
+    openModal.classList.remove('active');
+    pushBackSentinel();
+    return;
+  }
+
+  // 3. If visualizer is open, close it
   if (typeof Viz !== 'undefined' && Viz.active) {
     closeVisualizer();
     pushBackSentinel();
     return;
   }
 
-  // If on player screen → go to library/browse
+  // 4. If on player screen → go back to library/browse
   const playerActive = document.getElementById('player-screen').classList.contains('active');
   if (playerActive) {
     if (State.browseStack.length > 0) showScreen('browse-screen');
@@ -3821,7 +3976,7 @@ window.addEventListener('popstate', (event) => {
     return;
   }
 
-  // If on browse screen with depth > 1 → go up one level
+  // 5. If on browse screen with depth > 1 → go up one level
   const browseActive = document.getElementById('browse-screen').classList.contains('active');
   if (browseActive && State.browseStack.length > 1) {
     State.browseStack.pop();
@@ -3830,22 +3985,22 @@ window.addEventListener('popstate', (event) => {
     return;
   }
 
-  // If on browse screen at root → go to library
+  // 6. If on browse screen at root → go to library
   if (browseActive) {
     showLibrary();
     pushBackSentinel();
     return;
   }
 
-  // If on library screen → show logout confirm
+  // 7. If on library screen → show logout confirm
   const libActive = document.getElementById('library-screen').classList.contains('active');
   if (libActive) {
     showLogoutModal();
-    pushBackSentinel(); // re-push so dismissing modal doesn't exit
+    pushBackSentinel();
     return;
   }
 
-  // Any other screen (scan etc.) — ignore, re-push sentinel
+  // Any other screen — ignore
   pushBackSentinel();
 });
 
@@ -4673,35 +4828,62 @@ async function applyCleanNames() {
 // ════════════════════════════════════════════════════════════════
 function attachLongPress(el, callback, delay = 550) {
   let timer = null;
+  let fired = false;   // did the long-press fire this touch?
   let moved = false;
 
   function start(e) {
     moved = false;
+    fired = false;
     el.classList.add('longpress-active');
     timer = setTimeout(() => {
       if (!moved) {
+        fired = true;
         el.classList.remove('longpress-active');
-        // Prevent the click event that follows touchend
+        // Suppress the click that fires after touchend
         el._suppressNextClick = true;
-        setTimeout(() => { el._suppressNextClick = false; }, 400);
+        setTimeout(() => { el._suppressNextClick = false; }, 600);
         callback();
       }
     }, delay);
   }
-  function cancel() {
+
+  function onTouchEnd() {
+    // Only cancel if the long-press hasn't fired yet
+    if (!fired) {
+      clearTimeout(timer);
+      el.classList.remove('longpress-active');
+    }
+    fired = false;
+  }
+
+  function onTouchMove() {
+    moved = true;
     clearTimeout(timer);
     el.classList.remove('longpress-active');
   }
-  function move() { moved = true; cancel(); }
 
-  el.addEventListener('touchstart', start, { passive: true });
-  el.addEventListener('touchend',   cancel);
-  el.addEventListener('touchmove',  move,   { passive: true });
+  // Touch events — passive:true so browser doesn't wait for us during scroll
+  el.addEventListener('touchstart',   start,      { passive: true });
+  el.addEventListener('touchend',     onTouchEnd, { passive: true });
+  el.addEventListener('touchcancel',  onTouchEnd, { passive: true });
+  el.addEventListener('touchmove',    onTouchMove,{ passive: true });
+
+  // Mouse events (desktop / Chrome devtools)
   el.addEventListener('mousedown',  start);
-  el.addEventListener('mouseup',    cancel);
-  el.addEventListener('mousemove',  move);
-  // Suppress click after long press
-  el.addEventListener('click', e => { if (el._suppressNextClick) e.stopImmediatePropagation(); });
+  el.addEventListener('mouseup',    () => { clearTimeout(timer); el.classList.remove('longpress-active'); });
+  el.addEventListener('mouseleave', () => { clearTimeout(timer); el.classList.remove('longpress-active'); });
+  el.addEventListener('mousemove',  onTouchMove);
+
+  // Block native context menu (long-press on Android Chrome shows it otherwise)
+  el.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Suppress the click that follows a successful long-press
+  el.addEventListener('click', e => {
+    if (el._suppressNextClick) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    }
+  }, true); // capture phase so it runs before other listeners
 }
 
 // Show orange dot on art elements that are missing artwork
