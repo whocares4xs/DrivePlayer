@@ -1373,9 +1373,15 @@ function isImageFile(name) {
   return /\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(name);
 }
 
+// Encode path segments individually so spaces/apostrophes are safe
+// but forward slashes (folder separators) are preserved
+function encodePath(p) {
+  return p.split('/').map(encodeURIComponent).join('/');
+}
+
 // Direct streaming URL — browser handles range requests natively
 function getStreamUrl(songId) {
-  return `${getServerUrl()}/file/${songId}`;
+  return `${getServerUrl()}/file/${encodePath(songId)}`;
 }
 
 // For the new server, audio is streamed directly — no blob download needed
@@ -1384,12 +1390,12 @@ function getPlayableUrl(songId) {
 }
 
 async function serverDelete(songId) {
-  const resp = await fetch(`${getServerUrl()}/delete/${songId}`, { method: 'DELETE' });
+  const resp = await fetch(`${getServerUrl()}/delete/${encodePath(songId)}`, { method: 'DELETE' });
   if (!resp.ok) throw new Error(`Delete failed: ${resp.status}`);
 }
 
 async function serverRename(songId, newName) {
-  const resp = await fetch(`${getServerUrl()}/rename/${songId}`, {
+  const resp = await fetch(`${getServerUrl()}/rename/${encodePath(songId)}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: newName }),
@@ -1399,7 +1405,7 @@ async function serverRename(songId, newName) {
 
 async function fetchServerImageAsBase64(artPath) {
   try {
-    const resp = await fetch(`${getServerUrl()}/art/${artPath}`);
+    const resp = await fetch(`${getServerUrl()}/art/${encodePath(artPath)}`);
     if (!resp.ok) return null;
     const blob = await resp.blob();
     return new Promise(res => {
