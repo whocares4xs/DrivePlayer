@@ -1914,8 +1914,9 @@ Audio.addEventListener('loadedmetadata', () => {
 Audio.addEventListener('waiting', () => document.getElementById('player-loading').classList.add('show'));
 Audio.addEventListener('canplay', () => document.getElementById('player-loading').classList.remove('show'));
 Audio.addEventListener('error', (e) => {
-  // Only auto-skip if we have a real src set and it's not a voluntary src-clear
-  if (Audio.src && Audio.src !== window.location.href && State.currentSong) {
+  // Only auto-skip during active playback (not during load phase — playSong handles that)
+  if (State.isPlaying && Audio.src && Audio.src !== window.location.href && State.currentSong) {
+    console.error('[DrivePlayer] Audio error during playback:', Audio.error);
     showToast('Playback error — skipping track');
     setTimeout(nextTrack, 1000);
   }
@@ -2074,9 +2075,45 @@ async function playSong(song, queue = null, idx = 0) {
   if (!State.cleanRunning) showScreen('player-screen');
   renderQueueStrip();
 
-  // Direct URL streaming — browser handles buffering and range requests natively
+  // Direct URL streaming — set src and wait for canplay before calling play()
   const streamUrl = getStreamUrl(song.id);
-  Audio.src = streamUrl;
+  console.log('[DrivePlayer] Loading:', streamUrl);
+
+  // Reset audio element cleanly
+  Audio.pause();
+  Audio.removeAttribute('src');
+  Audio.load();
+
+  await new Promise((resolve, reject) => {
+    const onCanPlay = () => { cleanup(); resolve(); };
+    const onError   = () => {
+      cleanup();
+      const err = Audio.error;
+      reject(new Error(err ? `MediaError ${err.code}: ${err.message}` : 'Unknown audio error'));
+    };
+    const onStalled = () => {
+      // Stalled is not fatal — browser is waiting for data, keep waiting
+    };
+    function cleanup() {
+      Audio.removeEventListener('canplay',  onCanPlay);
+      Audio.removeEventListener('error',    onError);
+      Audio.removeEventListener('stalled',  onStalled);
+    }
+    Audio.addEventListener('canplay',  onCanPlay,  { once: true });
+    Audio.addEventListener('error',    onError,    { once: true });
+    Audio.addEventListener('stalled',  onStalled,  { once: true });
+    Audio.src = streamUrl;
+    Audio.load();
+  }).catch(async (e) => {
+    console.error('[DrivePlayer] Load error:', e.message, 'URL:', streamUrl);
+    showToast('Could not load track: ' + e.message);
+    return;
+  });
+
+  // If src changed while we were waiting (user skipped), abort
+  if (Audio.src !== streamUrl && !Audio.src.endsWith(encodeURIComponent(streamUrl))) {
+    return;
+  }
 
   try {
     await Audio.play();
@@ -2085,9 +2122,15 @@ async function playSong(song, queue = null, idx = 0) {
     document.getElementById('pause-icon').style.display = 'block';
     primeNextSong();
   } catch(e) {
-    showToast('Could not load track — check server connection');
-    console.error(e);
-    setTimeout(() => nextTrack(), 1500);
+    // NotAllowedError = autoplay blocked — show play button so user can tap
+    if (e.name === 'NotAllowedError') {
+      showToast('Tap play to start');
+      document.getElementById('play-icon').style.display = 'block';
+      document.getElementById('pause-icon').style.display = 'none';
+    } else {
+      console.error('[DrivePlayer] Play error:', e);
+      showToast('Playback error: ' + e.message);
+    }
   }
 }
 
