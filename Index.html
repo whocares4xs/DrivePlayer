@@ -1300,9 +1300,13 @@ const CONFIG = {
   DB_NAME: 'DrivePlayerDB',
 };
 
-// Server URL stored in localStorage — set on setup screen
+// Server is always the same origin — the HTML is served by Flask itself.
+// localStorage override kept for edge cases (e.g. opening the file directly).
 function getServerUrl() {
-  return (localStorage.getItem('dp_server') || '').replace(/\/$/, '');
+  const stored = localStorage.getItem('dp_server');
+  if (stored) return stored.replace(/\/$/, '');
+  // Auto-detect: use the origin this page was loaded from
+  return window.location.origin;
 }
 function setServerUrl(url) {
   localStorage.setItem('dp_server', url.replace(/\/$/, ''));
@@ -1424,13 +1428,28 @@ document.getElementById('sign-in-btn').addEventListener('click', async () => {
   if (!url) { statusEl.textContent = 'Please enter your server URL'; return; }
   if (!url.startsWith('http')) url = 'http://' + url;
   statusEl.textContent = 'Connecting…';
+
+  // Warn about mixed content before even trying
+  if (window.location.protocol === 'https:' && url.startsWith('http:')) {
+    statusEl.innerHTML = '⚠️ Open the app from <b>http://100.95.68.92:8765/app</b> instead of GitHub Pages to avoid browser security restrictions.';
+    statusEl.style.color = 'var(--accent)';
+    return;
+  }
+
   try {
-    const resp = await fetch(`${url}/ping`, { signal: AbortSignal.timeout(5000) });
+    const resp = await fetch(`${url}/ping`, { signal: AbortSignal.timeout(8000) });
     if (!resp.ok) throw new Error('Server responded with ' + resp.status);
     setServerUrl(url);
     await enterApp();
   } catch(e) {
-    statusEl.textContent = 'Could not connect — check the URL and make sure the server is running';
+    const isCors = e instanceof TypeError && e.message.includes('fetch');
+    if (isCors) {
+      statusEl.innerHTML = '⚠️ Browser blocked the connection (mixed content). Open the app at <b>' + url + '/app</b> instead.';
+      statusEl.style.color = 'var(--accent)';
+    } else {
+      statusEl.textContent = 'Could not connect (' + e.message + ') — check server is running and URL is correct.';
+      statusEl.style.color = '';
+    }
   }
 });
 
@@ -4896,9 +4915,23 @@ async function init() {
   const savedPlayed = await dbGet('meta', 'playedIds');
   if (savedPlayed && Array.isArray(savedPlayed)) State.playedIds = new Set(savedPlayed);
 
-  // If server URL is stored, go straight to app
-  const serverUrl = getServerUrl();
-  if (serverUrl) {
+  // Auto-connect: if served from Flask (not file:// or github.io), go straight in.
+  // If opened as a local file or from GitHub Pages, show setup screen.
+  const origin = window.location.origin;
+  const isFileOrPages = origin.startsWith('null') ||
+                        origin.includes('github.io') ||
+                        origin.includes('localhost') ||
+                        origin === 'null';
+
+  if (!isFileOrPages) {
+    // Served from the Flask server — auto-connect, no setup needed
+    await enterApp();
+    return;
+  }
+
+  // Opened from GitHub Pages or local file — check stored URL
+  const storedUrl = localStorage.getItem('dp_server');
+  if (storedUrl) {
     await enterApp();
     return;
   }
