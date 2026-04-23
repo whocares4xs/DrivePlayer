@@ -1470,16 +1470,73 @@ async function scanLibrary() {
     });
     if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
     const data = await resp.json();
-    const artists = data.artists || [];
+    const rawArtists = data.artists || [];
 
-    // Build flat allSongs list
+    // ── Normalize raw server data into full objects ──────────────
+    // Server returns: artist.name, artist.albums[{name, songs:[filename,...], art}], artist.songs:[filename,...]
+    // Client needs:   artist.id, album.id, song.id (path), song.name (display), song.artist, song.album, song.artKey
     const allSongs = [];
-    for (const artist of artists) {
-      for (const song of (artist.songs || [])) allSongs.push(song);
-      for (const album of (artist.albums || [])) {
-        for (const song of (album.songs || [])) allSongs.push(song);
-      }
-    }
+    const artists = rawArtists.map(rawArtist => {
+      const artistId = rawArtist.name; // use name as stable ID
+
+      const albums = (rawArtist.albums || []).map(rawAlbum => {
+        const albumId = `${rawArtist.name}/${rawAlbum.name}`;
+        const artPath = rawAlbum.art || null; // relative path like "Artist/Album/cover.jpg"
+        const artKey  = `album_${albumId}`;
+
+        const songs = (rawAlbum.songs || []).map(filename => {
+          const songId = `${rawArtist.name}/${rawAlbum.name}/${filename}`;
+          const song = {
+            id:         songId,           // used as stream path
+            name:       cleanName(filename),
+            artist:     rawArtist.name,
+            album:      rawAlbum.name,
+            artistId:   artistId,
+            albumId:    albumId,
+            artKey:     artKey,
+            artPath:    artPath,
+          };
+          allSongs.push(song);
+          return song;
+        });
+
+        return {
+          id:         albumId,
+          name:       rawAlbum.name,
+          artist:     rawArtist.name,
+          artistId:   artistId,
+          artPath:    artPath,
+          artKey:     artKey,
+          songs,
+        };
+      });
+
+      // Standalone songs directly under the artist folder
+      const standaloneArtKey = `artist_${artistId}`;
+      const standaloneSongs = (rawArtist.songs || []).map(filename => {
+        const songId = `${rawArtist.name}/${filename}`;
+        const song = {
+          id:       songId,
+          name:     cleanName(filename),
+          artist:   rawArtist.name,
+          album:    '',
+          artistId: artistId,
+          albumId:  null,
+          artKey:   standaloneArtKey,
+          artPath:  null,
+        };
+        allSongs.push(song);
+        return song;
+      });
+
+      return {
+        id:     artistId,
+        name:   rawArtist.name,
+        albums,
+        songs:  standaloneSongs,
+      };
+    });
+    // ── End normalization ─────────────────────────────────────────
 
     scanCount.textContent = allSongs.length;
     scanLabel.textContent = `Found ${allSongs.length} songs`;
