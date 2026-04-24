@@ -1477,41 +1477,40 @@ async function scanLibrary() {
     // Client needs:   artist.id, album.id, song.id (path), song.name (display), song.artist, song.album, song.artKey
     const allSongs = [];
     const artists = rawArtists.map(rawArtist => {
-      const artistId = rawArtist.name; // use name as stable ID
+      const artistId = rawArtist.name;
 
       const albums = (rawArtist.albums || []).map(rawAlbum => {
         const albumId = `${rawArtist.name}/${rawAlbum.name}`;
-        const artPath = rawAlbum.art || null; // relative path like "Artist/Album/cover.jpg"
+        const artPath = rawAlbum.art || null;
         const artKey  = `album_${albumId}`;
 
         const songs = (rawAlbum.songs || []).map(filename => {
           const songId = `${rawArtist.name}/${rawAlbum.name}/${filename}`;
           const song = {
-            id:         songId,           // used as stream path
-            name:       cleanName(filename),
-            artist:     rawArtist.name,
-            album:      rawAlbum.name,
-            artistId:   artistId,
-            albumId:    albumId,
-            artKey:     artKey,
-            artPath:    artPath,
+            id:       songId,
+            name:     cleanName(filename),
+            artist:   rawArtist.name,
+            album:    rawAlbum.name,
+            artistId: artistId,
+            albumId:  albumId,
+            artKey:   artKey,
+            artPath:  artPath,
           };
           allSongs.push(song);
           return song;
         });
 
         return {
-          id:         albumId,
-          name:       rawAlbum.name,
-          artist:     rawArtist.name,
-          artistId:   artistId,
-          artPath:    artPath,
-          artKey:     artKey,
+          id:       albumId,
+          name:     rawAlbum.name,
+          artist:   rawArtist.name,
+          artistId: artistId,
+          artPath:  artPath,
+          artKey:   artKey,
           songs,
         };
       });
 
-      // Standalone songs directly under the artist folder
       const standaloneArtKey = `artist_${artistId}`;
       const standaloneSongs = (rawArtist.songs || []).map(filename => {
         const songId = `${rawArtist.name}/${filename}`;
@@ -2158,36 +2157,40 @@ async function playSong(song, queue = null, idx = 0) {
   // Reset audio element cleanly
   Audio.pause();
   Audio.removeAttribute('src');
-  Audio.load();
 
-  await new Promise((resolve, reject) => {
-    const onCanPlay = () => { cleanup(); resolve(); };
+  // Tag this load so stale callbacks from a prior playSong don't fire
+  const loadId = Symbol();
+  Audio._loadId = loadId;
+
+  const loadOk = await new Promise((resolve) => {
+    let timer;
+    const onCanPlay = () => { cleanup(); resolve(true); };
     const onError   = () => {
       cleanup();
       const err = Audio.error;
-      reject(new Error(err ? `MediaError ${err.code}: ${err.message}` : 'Unknown audio error'));
-    };
-    const onStalled = () => {
-      // Stalled is not fatal — browser is waiting for data, keep waiting
+      console.error('[DrivePlayer] Load error:', err ? `MediaError ${err.code}` : 'unknown');
+      resolve(false);
     };
     function cleanup() {
-      Audio.removeEventListener('canplay',  onCanPlay);
-      Audio.removeEventListener('error',    onError);
-      Audio.removeEventListener('stalled',  onStalled);
+      clearTimeout(timer);
+      Audio.removeEventListener('canplay', onCanPlay);
+      Audio.removeEventListener('error',   onError);
     }
-    Audio.addEventListener('canplay',  onCanPlay,  { once: true });
-    Audio.addEventListener('error',    onError,    { once: true });
-    Audio.addEventListener('stalled',  onStalled,  { once: true });
+    Audio.addEventListener('canplay', onCanPlay, { once: true });
+    Audio.addEventListener('error',   onError,   { once: true });
+    // Timeout fallback: if canplay hasn't fired in 12s (screen off / slow network),
+    // proceed anyway — the browser will buffer as it can.
+    timer = setTimeout(() => { cleanup(); resolve(true); }, 12000);
     Audio.src = streamUrl;
     Audio.load();
-  }).catch(async (e) => {
-    console.error('[DrivePlayer] Load error:', e.message, 'URL:', streamUrl);
-    showToast('Could not load track: ' + e.message);
-    return;
   });
 
-  // If src changed while we were waiting (user skipped), abort
-  if (Audio.src !== streamUrl && !Audio.src.endsWith(encodeURIComponent(streamUrl))) {
+  // If a newer playSong() started while we were waiting, bail out silently
+  if (Audio._loadId !== loadId) return;
+
+  if (!loadOk) {
+    showToast('Could not load track — skipping');
+    setTimeout(nextTrack, 800);
     return;
   }
 
@@ -3059,21 +3062,22 @@ function vizBootstrapAudio() {
     }
     if (!Viz.analyser) {
       Viz.analyser = Viz.audioCtx.createAnalyser();
-      Viz.analyser.fftSize = 512;          // more bins = better resolution
+      Viz.analyser.fftSize = 512;
       Viz.analyser.smoothingTimeConstant = 0.75;
-      Viz.dataArr  = new Uint8Array(Viz.analyser.frequencyBinCount);
+      Viz.dataArr = new Uint8Array(Viz.analyser.frequencyBinCount);
     }
     if (!Viz.source) {
-      // createMediaElementSource throws if called twice — only call once ever
+      // createMediaElementSource can only ever be called ONCE per Audio element.
+      // After this the audio graph is: Audio → analyser → destination.
+      // Never null out Viz.source — if it exists the graph is already wired.
       Viz.source = Viz.audioCtx.createMediaElementSource(Audio);
       Viz.source.connect(Viz.analyser);
       Viz.analyser.connect(Viz.audioCtx.destination);
     }
   } catch(e) {
     console.warn('Visualizer audio setup failed:', e);
-    Viz.audioCtx = null;
-    Viz.analyser = null;
-    Viz.source   = null;
+    // Do NOT null Viz.source here — if it was already created the graph is live.
+    // Nulling it would cause a re-create attempt which throws and kills audio routing.
   }
 }
 
