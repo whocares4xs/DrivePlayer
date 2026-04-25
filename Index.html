@@ -728,9 +728,76 @@
     position:absolute; bottom:2px; right:2px; pointer-events:none;
   }
 
-  @media (prefers-color-scheme: dark) {
-    /* already dark */
+  @media (prefers-color-scheme: dark) { /* already dark */ }
+
+  /* ─── FOLDER BROWSER OVERLAY ─── */
+  #folder-browser {
+    position:fixed; inset:0; z-index:400;
+    background:#000; display:none; flex-direction:column;
   }
+  #folder-browser.open { display:flex; }
+  .fb-header {
+    display:flex; align-items:center; gap:12px;
+    padding:16px 16px 12px; border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .fb-back-btn, .fb-close-btn {
+    width:36px; height:36px; border-radius:50%; border:none;
+    background:var(--surface2); color:var(--text); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .fb-back-btn:active, .fb-close-btn:active { background:var(--surface3); }
+  .fb-title-wrap { flex:1; min-width:0; }
+  .fb-title { font-size:16px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fb-path  { font-size:11px; color:var(--text3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fb-import-bar {
+    padding:10px 16px; border-bottom:1px solid var(--border);
+    display:none; align-items:center; gap:10px; flex-shrink:0;
+    background:rgba(232,201,122,0.07);
+  }
+  .fb-import-bar.visible { display:flex; }
+  .fb-import-art {
+    width:48px; height:48px; border-radius:8px; background:var(--surface2);
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+    overflow:hidden; flex-shrink:0;
+  }
+  .fb-import-art img { width:100%; height:100%; object-fit:cover; }
+  .fb-import-info { flex:1; min-width:0; }
+  .fb-import-label { font-size:13px; font-weight:600; color:var(--accent); }
+  .fb-import-sub   { font-size:11px; color:var(--text2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fb-import-btn {
+    background:var(--accent); color:#000; border:none; border-radius:50px;
+    padding:9px 18px; font-size:14px; font-weight:700; cursor:pointer;
+    font-family:'DM Sans',sans-serif; flex-shrink:0; white-space:nowrap;
+  }
+  .fb-import-btn:active { transform:scale(0.96); }
+  .fb-import-btn:disabled { opacity:0.4; pointer-events:none; }
+  .fb-list { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .fb-loading {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:12px; height:120px; color:var(--text2); font-size:13px;
+  }
+  .fb-spinner {
+    width:28px; height:28px; border-radius:50%;
+    border:2px solid var(--border); border-top-color:var(--accent);
+    animation:spin 0.9s linear infinite;
+  }
+  .fb-item {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 16px; border-bottom:1px solid var(--border);
+    cursor:pointer; transition:background 0.1s;
+  }
+  .fb-item:active { background:var(--surface2); }
+  .fb-item-icon {
+    width:40px; height:40px; border-radius:10px; background:var(--surface2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; flex-shrink:0; overflow:hidden;
+  }
+  .fb-item-icon img { width:100%; height:100%; object-fit:cover; }
+  .fb-item-info { flex:1; min-width:0; }
+  .fb-item-name { font-size:15px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fb-item-sub  { font-size:12px; color:var(--text2); margin-top:2px; }
+  .fb-item-arrow { color:var(--text3); flex-shrink:0; }
+  .fb-empty { padding:40px 20px; text-align:center; color:var(--text3); font-size:13px; }
 </style>
 
 </head>
@@ -801,6 +868,9 @@
       </div>
       <button class="player-top-btn" id="lib-rescan-btn" title="Rescan" style="background:none;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+      <button class="player-top-btn" id="lib-browse-btn" title="Browse server folders" style="background:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
       </button>
     </div>
   </div>
@@ -1475,18 +1545,33 @@ async function scanLibrary() {
     const artists = rawArtists.map(rawArtist => {
       const artistId = rawArtist.name;
       const albums = (rawArtist.albums || []).map(rawAlbum => {
-        const albumId = `${rawArtist.name}/${rawAlbum.name}`;
-        const artPath = rawAlbum.art || null;
-        const artKey  = `album_${albumId}`;
-        const songs   = (rawAlbum.songs || []).map(filename => {
-          const s = { id:`${rawArtist.name}/${rawAlbum.name}/${filename}`, name:cleanName(filename), artist:rawArtist.name, album:rawAlbum.name, artistId, albumId, artKey, artPath };
+        // New server includes a 'path' field (relative to MUSIC_ROOT) for albums
+        // in category subfolders e.g. "NOFX/EP/Ribbed". Fall back to Artist/Name.
+        const albumPath = rawAlbum.path || `${rawArtist.name}/${rawAlbum.name}`;
+        const albumId   = albumPath;
+        const artPath   = rawAlbum.art || null;
+        const artKey    = `album_${albumId}`;
+        const songs = (rawAlbum.songs || []).map(filename => {
+          const s = {
+            id:       `${albumPath}/${filename}`,
+            name:     cleanName(filename),
+            artist:   rawArtist.name,
+            album:    rawAlbum.name,
+            artistId, albumId, artKey, artPath,
+          };
           allSongs.push(s); return s;
         });
-        return { id:albumId, name:rawAlbum.name, artist:rawArtist.name, artistId, artPath, artKey, songs };
+        return { id:albumId, name:rawAlbum.name, artist:rawArtist.name,
+                 artistId, artPath, artKey, songs,
+                 category: rawAlbum.category || null };
       });
       const standaloneArtKey = `artist_${artistId}`;
       const standaloneSongs = (rawArtist.songs || []).map(filename => {
-        const s = { id:`${rawArtist.name}/${filename}`, name:cleanName(filename), artist:rawArtist.name, album:'', artistId, albumId:null, artKey:standaloneArtKey, artPath:null };
+        const s = {
+          id:`${rawArtist.name}/${filename}`, name:cleanName(filename),
+          artist:rawArtist.name, album:'', artistId, albumId:null,
+          artKey:standaloneArtKey, artPath:null,
+        };
         allSongs.push(s); return s;
       });
       return { id:artistId, name:rawArtist.name, albums, songs:standaloneSongs };
@@ -1943,7 +2028,7 @@ Audio.addEventListener('loadedmetadata', () => {
 });
 Audio.addEventListener('waiting', () => document.getElementById('player-loading').classList.add('show'));
 Audio.addEventListener('canplay', () => document.getElementById('player-loading').classList.remove('show'));
-// No global 'error' handler — playSong() manages per-song error handling.
+// No global error handler — playSong() manages per-song error handling.
 
 function updateProgress() {
   // Kept for backward compatibility — actual updates handled by
@@ -2098,29 +2183,20 @@ async function playSong(song, queue = null, idx = 0) {
   if (!State.cleanRunning) showScreen('player-screen');
   renderQueueStrip();
 
-  // ── Fast direct streaming ────────────────────────────────────
   const streamUrl = getStreamUrl(song.id);
-
-  // Monotonic ID — if user skips again before play() resolves, we bail out
   playSong._id = (playSong._id || 0) + 1;
-  const myId    = playSong._id;
+  const myId = playSong._id;
 
-  // Stop current playback and assign new src
   Audio.pause();
   Audio.src = streamUrl;
 
-  // IMPORTANT: defer attaching the error listener by one event-loop tick.
-  // If the previous song was in an error state, a stale 'error' event may
-  // be queued in the microtask/task queue right now. By waiting one tick
-  // with setTimeout(0) we let that stale event fire and go nowhere, then
-  // attach our handler so it only catches errors for THIS src.
-  await new Promise(resolve => setTimeout(resolve, 0));
-  if (playSong._id !== myId) return; // superseded while waiting
+  // Wait one event-loop tick so any stale queued error events from the
+  // previous song fire harmlessly before we attach the new listener.
+  await new Promise(r => setTimeout(r, 0));
+  if (playSong._id !== myId) return;
 
   function onSongError() {
-    // Double-check this error is for our src, not a stale one
     if (playSong._id !== myId) return;
-    if (!Audio.src.includes(encodeURIComponent(song.id.split('/').pop()))) return;
     console.error('[DrivePlayer] MediaError', Audio.error?.code, streamUrl);
     showToast('Could not load — skipping');
     setTimeout(nextTrack, 800);
@@ -2135,7 +2211,7 @@ async function playSong(song, queue = null, idx = 0) {
     document.getElementById('play-icon').style.display = 'none';
     document.getElementById('pause-icon').style.display = 'block';
     primeNextSong();
-  } catch (e) {
+  } catch(e) {
     Audio.removeEventListener('error', onSongError);
     if (playSong._id !== myId) return;
     if (e.name === 'NotAllowedError') {
@@ -2959,19 +3035,13 @@ function startShuffleAll() {
 // ════════════════════════════════════════════════════════════════
 //  VISUALIZER ENGINE  —  zero Web Audio API
 //  createMediaElementSource() permanently hijacks Audio routing.
-//  On Android, AudioContext suspends aggressively and breaks audio.
-//  We use a physics beat model (performance.now()) instead.
+//  On Android the AudioContext suspends and audio is lost forever.
+//  We use a physics beat model driven by performance.now() instead.
 // ════════════════════════════════════════════════════════════════
 const Viz = {
-  active:  false,
-  mode:    'stars',
-  color:   '#e8c97a',
-  animId:  null,
-  canvas:  null,
-  ctx:     null,
-  stars:   [],
-  time:    0,
-  energy:  0,
+  active:  false, mode: 'stars', color: '#e8c97a',
+  animId:  null,  canvas: null,  ctx: null,
+  stars:   [],    time:  0,      energy: 0,
   _pausedByVisibility: false,
 };
 
@@ -2995,10 +3065,8 @@ function vizGetEnergy() {
     for (let i = 0; i < 256; i++) {
       const n = i / 256;
       data[i] = Math.min(255, Math.round((
-        Math.exp(-n * 4.5) * bass * 1.4 +
-        Math.sin(n * Math.PI) * mid * 0.7 +
-        (1 - n) * high * 0.4 +
-        (Math.sin(t * 11 + i * 0.4) * 0.5 + 0.5) * 0.12
+        Math.exp(-n * 4.5) * bass * 1.4 + Math.sin(n * Math.PI) * mid * 0.7 +
+        (1 - n) * high * 0.4 + (Math.sin(t * 11 + i * 0.4) * 0.5 + 0.5) * 0.12
       ) * 255));
     }
   }
@@ -3034,7 +3102,8 @@ function closeVisualizer() {
 function vizUpdateTrackInfo() {
   if (!State.currentSong) return;
   document.getElementById('viz-track').textContent  = State.currentSong.name;
-  document.getElementById('viz-artist').textContent = [State.currentSong.artist, State.currentSong.album].filter(Boolean).join(' · ');
+  document.getElementById('viz-artist').textContent =
+    [State.currentSong.artist, State.currentSong.album].filter(Boolean).join(' · ');
 }
 
 function vizSyncPlayPause() {
@@ -4899,6 +4968,280 @@ init().catch(e => {
   document.getElementById('auth-status').textContent = 'Error: ' + e.message;
   showScreen('auth-screen');
 });
+</script>
+
+<!-- ─── FOLDER BROWSER OVERLAY ─── -->
+<div id="folder-browser">
+  <div class="fb-header">
+    <button class="fb-back-btn" id="fb-back-btn" title="Go up">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="fb-title-wrap">
+      <div class="fb-title" id="fb-title">Music</div>
+      <div class="fb-path"  id="fb-path"></div>
+    </div>
+    <button class="fb-close-btn" id="fb-close-btn" title="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <!-- Import banner — shown when current folder contains audio files -->
+  <div class="fb-import-bar" id="fb-import-bar">
+    <div class="fb-import-art" id="fb-import-art">📁</div>
+    <div class="fb-import-info">
+      <div class="fb-import-label" id="fb-import-label">This folder has songs</div>
+      <div class="fb-import-sub"  id="fb-import-sub">Import as album</div>
+    </div>
+    <button class="fb-import-btn" id="fb-import-btn">Import</button>
+  </div>
+  <div class="fb-list" id="fb-list"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  FOLDER BROWSER
+// ════════════════════════════════════════════════════════════════
+const FB = {
+  stack:      [],   // navigation history [{path, name, scrollTop}]
+  current:    null, // current browse response
+  importing:  false,
+};
+
+function fbOpen() {
+  FB.stack   = [];
+  FB.current = null;
+  document.getElementById('folder-browser').classList.add('open');
+  fbNavigate('');
+}
+
+function fbClose() {
+  document.getElementById('folder-browser').classList.remove('open');
+}
+
+async function fbNavigate(path) {
+  const listEl    = document.getElementById('fb-list');
+  const titleEl   = document.getElementById('fb-title');
+  const pathEl    = document.getElementById('fb-path');
+  const importBar = document.getElementById('fb-import-bar');
+  const backBtn   = document.getElementById('fb-back-btn');
+
+  // Show loading
+  listEl.innerHTML = '<div class="fb-loading"><div class="fb-spinner"></div><span>Loading…</span></div>';
+  importBar.classList.remove('visible');
+
+  let data;
+  try {
+    const url = path
+      ? `${getServerUrl()}/browse/${encodePath(path)}`
+      : `${getServerUrl()}/browse/`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!resp.ok) throw new Error(`Server ${resp.status}`);
+    data = await resp.json();
+  } catch(e) {
+    listEl.innerHTML = `<div class="fb-empty">Could not load folder.<br><small>${e.message}</small></div>`;
+    return;
+  }
+
+  FB.current = data;
+
+  // Header
+  titleEl.textContent = data.name || path.split('/').pop() || 'Music';
+  pathEl.textContent  = path || '';
+  backBtn.style.opacity = FB.stack.length > 0 ? '1' : '0.3';
+  backBtn.style.pointerEvents = FB.stack.length > 0 ? '' : 'none';
+
+  // Import bar — visible if this folder has audio files
+  if (data.is_album && data.files && data.files.length > 0) {
+    importBar.classList.add('visible');
+    document.getElementById('fb-import-label').textContent =
+      `${data.files.length} song${data.files.length !== 1 ? 's' : ''} — import as album`;
+    document.getElementById('fb-import-sub').textContent   = path || data.name;
+
+    // Show art thumbnail if available
+    const artEl = document.getElementById('fb-import-art');
+    if (data.art) {
+      const artUrl = `${getServerUrl()}/art/${encodePath(data.art)}`;
+      artEl.innerHTML = `<img src="${artUrl}" onerror="this.parentElement.textContent='🎵'">`;
+    } else {
+      artEl.textContent = '🎵';
+    }
+  }
+
+  // Render folder list
+  const folders = data.folders || [];
+  const files   = data.files   || [];
+
+  if (folders.length === 0 && files.length === 0) {
+    listEl.innerHTML = '<div class="fb-empty">Empty folder</div>';
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+
+  // Folders first
+  folders.forEach(folder => {
+    const div = document.createElement('div');
+    div.className = 'fb-item';
+    const hasArt = false; // could fetch, but skip for perf
+    const subText = folder.audio_count > 0
+      ? `${folder.audio_count} song${folder.audio_count !== 1 ? 's' : ''}`
+      : 'Folder';
+    div.innerHTML = `
+      <div class="fb-item-icon">📁</div>
+      <div class="fb-item-info">
+        <div class="fb-item-name">${escHtml(folder.name)}</div>
+        <div class="fb-item-sub">${escHtml(subText)}</div>
+      </div>
+      <div class="fb-item-arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>`;
+    div.addEventListener('click', () => {
+      FB.stack.push({ path: data.path, name: data.name, scrollTop: listEl.scrollTop });
+      fbNavigate(folder.path);
+    });
+    frag.appendChild(div);
+  });
+
+  // Audio files (display only — importing is done via the bar)
+  files.forEach(file => {
+    const div = document.createElement('div');
+    div.className = 'fb-item';
+    div.style.opacity = '0.6';
+    div.innerHTML = `
+      <div class="fb-item-icon">🎵</div>
+      <div class="fb-item-info">
+        <div class="fb-item-name">${escHtml(file.name)}</div>
+        <div class="fb-item-sub">Audio file</div>
+      </div>`;
+    frag.appendChild(div);
+  });
+
+  listEl.innerHTML = '';
+  listEl.appendChild(frag);
+}
+
+function fbGoBack() {
+  if (FB.stack.length === 0) return;
+  const prev = FB.stack.pop();
+  fbNavigate(prev.path || '').then(() => {
+    const listEl = document.getElementById('fb-list');
+    if (prev.scrollTop) listEl.scrollTop = prev.scrollTop;
+  }).catch(() => {});
+}
+
+async function fbImport() {
+  if (!FB.current || !FB.current.is_album) return;
+  if (FB.importing) return;
+
+  const data = FB.current;
+  const path = data.path; // e.g. "NOFX/EP/Ribbed" or "Artist/Album"
+  const parts = path.split('/');
+
+  // Determine artist from path: always first segment
+  const artistName = parts[0];
+
+  // Album name: last segment of path
+  const albumName = parts[parts.length - 1];
+
+  // Build album id — the path itself is the id prefix
+  const albumId  = path;
+  const artKey   = `album_${albumId}`;
+
+  // Build song objects
+  const songs = (data.files || []).map(f => ({
+    id:       f.path,
+    name:     cleanName(f.name),
+    artist:   artistName,
+    album:    albumName,
+    artistId: artistName,
+    albumId:  albumId,
+    artKey:   artKey,
+    artPath:  data.art || null,
+  }));
+
+  if (songs.length === 0) { showToast('No audio files found'); return; }
+
+  FB.importing = true;
+  document.getElementById('fb-import-btn').disabled = true;
+  document.getElementById('fb-import-btn').textContent = 'Importing…';
+
+  try {
+    // Load current library from state or DB
+    const lib = State.library;
+    if (!lib) { showToast('Load library first'); return; }
+
+    // Find or create artist
+    let artist = lib.artists.find(a => a.id === artistName || a.name === artistName);
+    if (!artist) {
+      artist = { id: artistName, name: artistName, albums: [], songs: [] };
+      lib.artists.push(artist);
+      lib.artists.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    // Find or replace album
+    const existingIdx = artist.albums.findIndex(a => a.id === albumId);
+    const albumObj = {
+      id:       albumId,
+      name:     albumName,
+      artist:   artistName,
+      artistId: artistName,
+      artPath:  data.art || null,
+      artKey:   artKey,
+      songs,
+    };
+
+    if (existingIdx >= 0) {
+      artist.albums[existingIdx] = albumObj;
+    } else {
+      artist.albums.push(albumObj);
+      artist.albums.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    // Merge songs into allSongs (remove old versions of same album first)
+    lib.allSongs = lib.allSongs.filter(s => s.albumId !== albumId);
+    lib.allSongs.push(...songs);
+
+    // Cache art if available
+    if (data.art) {
+      try {
+        const artBase64 = await fetchServerImageAsBase64(data.art);
+        if (artBase64) await dbSet('artwork', artKey, artBase64);
+      } catch(e) { /* art is optional */ }
+    }
+
+    // Persist updated library to IndexedDB
+    await dbSet('library', 'library', lib);
+
+    showToast(`Imported "${albumName}" (${songs.length} songs)`);
+
+    // Refresh library UI if currently on library screen
+    if (document.getElementById('library-screen').classList.contains('active')) {
+      renderLibrary();
+    }
+
+    document.getElementById('fb-import-btn').textContent = '✓ Imported';
+    setTimeout(() => {
+      document.getElementById('fb-import-btn').textContent = 'Import';
+      document.getElementById('fb-import-btn').disabled = false;
+    }, 2000);
+  } catch(e) {
+    console.error('Import error:', e);
+    showToast('Import failed: ' + e.message);
+    document.getElementById('fb-import-btn').textContent = 'Import';
+    document.getElementById('fb-import-btn').disabled = false;
+  } finally {
+    FB.importing = false;
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Wire up folder browser buttons
+document.getElementById('fb-close-btn').addEventListener('click', fbClose);
+document.getElementById('fb-back-btn').addEventListener('click', fbGoBack);
+document.getElementById('fb-import-btn').addEventListener('click', fbImport);
+document.getElementById('lib-browse-btn').addEventListener('click', fbOpen);
 </script>
 </body>
 </html>
