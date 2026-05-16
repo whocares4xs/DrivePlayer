@@ -966,11 +966,19 @@
     </div>
     <div class="modal-item" id="menu-rescan">
       <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
-      <div><div class="modal-item-label">Rescan Library</div><div class="modal-item-sub">Re-fetch from Google Drive</div></div>
+      <div><div class="modal-item-label">Rescan Library</div><div class="modal-item-sub">Re-fetch from server SD card</div></div>
     </div>
     <div class="modal-item" id="menu-clean-names">
       <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
       <div><div class="modal-item-label">Clean Names</div><div class="modal-item-sub">Remove artist/album from song &amp; album names</div></div>
+    </div>
+    <div class="modal-item" id="menu-view-artist">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <div><div class="modal-item-label">View this Artist</div><div class="modal-item-sub" id="menu-view-artist-sub">Browse all albums</div></div>
+    </div>
+    <div class="modal-item" id="menu-view-album">
+      <div class="modal-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="5"/></svg></div>
+      <div><div class="modal-item-label">View this Album</div><div class="modal-item-sub" id="menu-view-album-sub">Browse songs in album</div></div>
     </div>
     <div class="modal-item" id="menu-delete-song">
       <div class="modal-item-icon" style="color:#e05555;">
@@ -980,7 +988,7 @@
         </svg>
       </div>
       <div><div class="modal-item-label" style="color:#e05555;">Delete Song</div>
-      <div class="modal-item-sub">Remove from Drive permanently</div></div>
+      <div class="modal-item-sub">Remove from SD card permanently</div></div>
     </div>
     <div class="modal-item" id="menu-cancel">
       <div class="modal-item-icon" style="color:#888"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
@@ -1068,7 +1076,7 @@
     <div class="modal-handle"></div>
     <div class="modal-title" style="color:#e05555;">Delete?</div>
     <div style="padding:0 20px 16px;font-size:14px;color:var(--text2);line-height:1.7;" id="delete-modal-msg">
-      This will remove this file permanently from Google Drive.
+      This will remove this file permanently from the SD card.
     </div>
     <div class="modal-item" id="delete-confirm-btn">
       <div class="modal-item-icon" style="color:#e05555;">
@@ -1128,7 +1136,7 @@
         </svg>
       </div>
       <div><div class="modal-item-label" style="color:#e05555;">Delete Song</div>
-      <div class="modal-item-sub">Remove from Drive permanently</div></div>
+      <div class="modal-item-sub">Remove from SD card permanently</div></div>
     </div>
     <div class="modal-item" id="ctx-cancel-btn">
       <div class="modal-item-icon" style="color:#888">
@@ -1917,6 +1925,66 @@ function setupMediaSession(song, artSrc) {
   navigator.mediaSession.setActionHandler('seekto', e => { if (e.seekTime != null) Audio.currentTime = e.seekTime; });
 }
 
+// ── Bluetooth / audio device disconnect → auto-pause ─────────
+// When a BT speaker disconnects, Android reroutes audio to the
+// phone speaker. We detect the device list change and pause so
+// music doesn't suddenly blast from the phone speaker.
+(function setupBTAutoPause() {
+  if (!navigator.mediaDevices) return;
+
+  // Snapshot of output device labels when playback starts.
+  // We compare against this after a devicechange event.
+  let _lastOutputDevices = new Set();
+
+  async function snapshotOutputDevices() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      _lastOutputDevices = new Set(
+        devices
+          .filter(d => d.kind === 'audiooutput')
+          .map(d => d.deviceId)
+      );
+    } catch(e) {}
+  }
+
+  // Refresh snapshot whenever playback starts
+  Audio.addEventListener('play', () => snapshotOutputDevices());
+
+  // On device change, check if an output we were using disappeared
+  navigator.mediaDevices.addEventListener('devicechange', async () => {
+    if (!State.isPlaying || Audio.paused) return;
+
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const currentOutputs = new Set(
+        devices
+          .filter(d => d.kind === 'audiooutput')
+          .map(d => d.deviceId)
+      );
+
+      // Check if any previously active output device is now gone
+      let lostDevice = false;
+      for (const id of _lastOutputDevices) {
+        if (!currentOutputs.has(id)) { lostDevice = true; break; }
+      }
+
+      if (lostDevice) {
+        console.log('[DrivePlayer] Audio output device lost — pausing');
+        // Small delay so Android finishes rerouting before we pause
+        setTimeout(() => {
+          if (State.isPlaying && !Audio.paused) {
+            playPause(); // uses existing pause logic (updates UI, releases wake lock etc)
+            showToast('Audio device disconnected — paused');
+          }
+        }, 400);
+      }
+
+      // Update snapshot to current state
+      _lastOutputDevices = currentOutputs;
+    } catch(e) {}
+  });
+})();
+
 // ════════════════════════════════════════════════════════════════
 //  BACKGROUND AUDIO — keeps music playing with screen off
 //
@@ -1942,10 +2010,7 @@ async function acquireWakeLock() {
 function releaseWakeLock() {
   if (_wakeLock && !_wakeLock.released) { _wakeLock.release().catch(()=>{}); _wakeLock = null; }
 }
-// Re-acquire after screen comes back on (system always releases on hide)
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && State.isPlaying) acquireWakeLock();
-});
+// visibilitychange is handled below with the full Viz + UI flush logic
 
 // ── Heartbeat ────────────────────────────────────────────────
 // Fires every 10s to keep MediaSession alive and JS thread awake
@@ -1972,27 +2037,105 @@ function stopHeartbeat() {
   if (_heartbeatId) { clearInterval(_heartbeatId); _heartbeatId = null; }
 }
 
+// ── Synchronous next-song picker (no state mutation) ──────────
+// Used by the ended handler so it works even when JS is throttled
+// screen-off. Does NOT call playSong() — no async, no await, no
+// setTimeout. Just returns the song object and new index.
+function peekNextSong() {
+  if (!State.queue.length) return null;
+  if (State.playMode === 'loop-song') {
+    return { song: State.currentSong, idx: State.queueIndex };
+  }
+  if (State.isShuffleOn) {
+    const played = new Set(State.playedIds);
+    if (State.currentSong) played.add(State.currentSong.id);
+    let unplayed = State.queue.filter(s => !played.has(s.id));
+    if (!unplayed.length) {
+      // Full cycle done — reset
+      played.clear();
+      if (State.currentSong) played.add(State.currentSong.id);
+      unplayed = State.queue.filter(s => s.id !== State.currentSong?.id);
+    }
+    if (!unplayed.length) return null;
+    const pick = unplayed[Math.floor(Math.random() * unplayed.length)];
+    const idx  = State.queue.indexOf(pick);
+    return { song: pick, idx };
+  }
+  const atEnd = State.queueIndex >= State.queue.length - 1;
+  if (State.playMode === 'continuous' && atEnd) return null; // stop
+  const idx = (State.queueIndex + 1) % State.queue.length;
+  return { song: State.queue[idx], idx };
+}
+
 // ── Ended handler ─────────────────────────────────────────────
-// Fires reliably even screen-off. Kept synchronous — no async/await.
+// MUST be fully synchronous — no async/await/setTimeout.
+// When screen is off Android suspends the JS microtask queue so
+// any await after 'ended' fires will never resume.
+// We directly assign Audio.src and call play() — the browser
+// audio pipeline handles buffering/playback at the native level.
 Audio.addEventListener('ended', () => {
-  switch (State.playMode) {
-    case 'loop-song':
-      Audio.currentTime = 0;
-      Audio.play().catch(() => {});
-      break;
-    case 'once':
-      State.isPlaying = false;
-      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-      releaseWakeLock();
-      stopHeartbeat();
-      document.getElementById('play-icon').style.display = 'block';
-      document.getElementById('pause-icon').style.display = 'none';
-      break;
-    case 'continuous':
-    case 'loop-context':
-    default:
-      nextTrack();
-      break;
+  if (State.playMode === 'loop-song') {
+    Audio.currentTime = 0;
+    Audio.play().catch(() => {});
+    return;
+  }
+  if (State.playMode === 'once') {
+    State.isPlaying = false;
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    releaseWakeLock();
+    stopHeartbeat();
+    // UI update deferred — may not run screen-off, fine
+    document.getElementById('play-icon').style.display = 'block';
+    document.getElementById('pause-icon').style.display = 'none';
+    return;
+  }
+
+  // Continuous / loop-context / shuffle
+  const next = peekNextSong();
+  if (!next) {
+    // End of queue with no loop
+    State.isPlaying = false;
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    releaseWakeLock();
+    stopHeartbeat();
+    return;
+  }
+
+  // ── Synchronous transition ──────────────────────────────────
+  // Update state NOW before any await so it's consistent
+  if (State.isShuffleOn && State.currentSong) {
+    State.playedIds.add(State.currentSong.id);
+  }
+  State.currentSong  = next.song;
+  State.queueIndex   = next.idx;
+
+  // Directly wire the next URL — no playSong(), no await
+  const url = getStreamUrl(next.song.id);
+  playSong._id = (playSong._id || 0) + 1; // invalidate any pending playSong calls
+  Audio.src = url;
+  Audio.play().catch(e => {
+    // NotAllowedError can happen if screen-off — retry once on next user gesture
+    console.warn('[DrivePlayer] ended→play rejected:', e.name);
+  });
+
+  // Best-effort UI + MediaSession update (may not run screen-off, that's ok)
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'playing';
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title:  next.song.name  || '',
+      artist: next.song.artist || '',
+      album:  next.song.album  || '',
+    });
+  }
+
+  // Defer heavy UI work to when screen comes back on
+  if (!document.hidden) {
+    updatePlayerUI(next.song);
+    renderQueueStrip();
+    primeNextSong();
+  } else {
+    // Flag so visibilitychange refreshes UI when screen wakes
+    State._pendingUIUpdate = true;
   }
 });
 
@@ -2069,8 +2212,19 @@ document.addEventListener('visibilitychange', () => {
       Viz._pausedByVisibility = true;
     }
   } else {
-    // Screen back on: re-acquire wake lock, resume visualizer
+    // Screen back on
     if (State.isPlaying) acquireWakeLock();
+
+    // Flush any UI update that was deferred while screen was off
+    if (State._pendingUIUpdate && State.currentSong) {
+      State._pendingUIUpdate = false;
+      updatePlayerUI(State.currentSong);
+      renderQueueStrip();
+      primeNextSong();
+      if (Viz.active) vizUpdateTrackInfo();
+    }
+
+    // Resume visualizer if it was running
     if (Viz.active && Viz._pausedByVisibility) {
       Viz._pausedByVisibility = false;
       vizLoop();
@@ -3435,11 +3589,11 @@ function openDeleteConfirm(songs, mode) {
   const subEl     = document.getElementById('delete-confirm-sub');
 
   if (isMulti && count > 1) {
-    msgEl.textContent   = `This will permanently remove ${count} song${count !== 1 ? 's' : ''} from Google Drive. This cannot be undone.`;
+    msgEl.textContent   = `This will permanently remove ${count} song${count !== 1 ? 's' : ''} from the SD card. This cannot be undone.`;
     labelEl.textContent = `Yes, delete ${count} songs`;
   } else {
     const name = isMulti ? songs[0].name : songs.name;
-    msgEl.textContent   = `"${name}" will be permanently removed from Google Drive. This cannot be undone.`;
+    msgEl.textContent   = `"${name}" will be permanently removed from the SD card. This cannot be undone.`;
     labelEl.textContent = 'Yes, delete';
   }
   subEl.textContent = 'Files moved to Drive trash (recoverable from drive.google.com)';
@@ -3916,6 +4070,34 @@ document.getElementById('player-fav-btn').addEventListener('click', () => {
 
 // Menu btn
 document.getElementById('player-menu-btn').addEventListener('click', () => {
+  // Populate dynamic subtitles before showing menu
+  const song = State.currentSong;
+  const hasArtist = !!(song && song.artist);
+  const hasAlbum  = !!(song && song.album);
+
+  const viewArtistItem = document.getElementById('menu-view-artist');
+  const viewAlbumItem  = document.getElementById('menu-view-album');
+
+  if (hasArtist) {
+    document.getElementById('menu-view-artist-sub').textContent = song.artist;
+    viewArtistItem.style.opacity = '1';
+    viewArtistItem.style.pointerEvents = '';
+  } else {
+    document.getElementById('menu-view-artist-sub').textContent = 'No song playing';
+    viewArtistItem.style.opacity = '0.4';
+    viewArtistItem.style.pointerEvents = 'none';
+  }
+
+  if (hasAlbum) {
+    document.getElementById('menu-view-album-sub').textContent = song.album;
+    viewAlbumItem.style.opacity = '1';
+    viewAlbumItem.style.pointerEvents = '';
+  } else {
+    document.getElementById('menu-view-album-sub').textContent = 'No album info';
+    viewAlbumItem.style.opacity = '0.4';
+    viewAlbumItem.style.pointerEvents = 'none';
+  }
+
   document.getElementById('menu-modal').classList.add('active');
 });
 document.getElementById('menu-cancel').addEventListener('click', () => {
@@ -3939,6 +4121,30 @@ document.getElementById('menu-sleep').addEventListener('click', () => {
 document.getElementById('menu-rescan').addEventListener('click', () => {
   document.getElementById('menu-modal').classList.remove('active');
   scanLibrary();
+});
+
+// ── View this Artist ──────────────────────────────────────────
+document.getElementById('menu-view-artist').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  if (!State.currentSong || !State.library) return;
+  const artist = State.library.artists.find(a => a.id === State.currentSong.artistId || a.name === State.currentSong.artist);
+  if (!artist) { showToast('Artist not found in library'); return; }
+  // Navigate without stopping playback
+  openArtist(artist);
+});
+
+// ── View this Album ───────────────────────────────────────────
+document.getElementById('menu-view-album').addEventListener('click', () => {
+  document.getElementById('menu-modal').classList.remove('active');
+  if (!State.currentSong || !State.library) return;
+  let album = null, artist = null;
+  for (const a of State.library.artists) {
+    const found = a.albums.find(alb => alb.id === State.currentSong.albumId);
+    if (found) { album = found; artist = a; break; }
+  }
+  if (!album || !artist) { showToast('Album not found in library'); return; }
+  // Navigate without stopping playback
+  openAlbum(album, artist);
 });
 
 // Sleep timer
@@ -4039,7 +4245,7 @@ async function executeRename() {
   }
 
   statusEl.classList.add('loading');
-  statusTx.textContent = 'Renaming on Google Drive…';
+  statusTx.textContent = 'Renaming on server…';
   saveBtn.disabled = true;
 
   try {
@@ -4641,7 +4847,7 @@ async function applyCleanNames() {
     document.getElementById('clean-detail').textContent = '';
     document.querySelector('#clean-screen .scan-ring').style.display = 'none';
     document.querySelector('#clean-screen .scan-progress').style.display = 'none';
-    doneDtl.textContent = `${totalDone} file${totalDone !== 1 ? 's' : ''} renamed on Google Drive${totalFailed > 0 ? ' · ' + totalFailed + ' failed' : ''}.`;
+    doneDtl.textContent = `${totalDone} file${totalDone !== 1 ? 's' : ''} renamed on server${totalFailed > 0 ? ' · ' + totalFailed + ' failed' : ''}.`;
     doneMsg.style.display = 'block';
     cleanEl.style.display = 'flex';
 
